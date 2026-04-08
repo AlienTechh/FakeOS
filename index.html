@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>FakeOS 1.0 - Screen Lock Settings</title>
+    <title>FakeOS 1.0 - Real Battery</title>
     <style>
         :root { --spd: 0.5s; --ios-spring: cubic-bezier(0.3, 1.2, 0.3, 1); --bright: 1; }
         
         body { 
             margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; 
             background: #0a0a0a; font-family: -apple-system, sans-serif; overflow: hidden; 
-            user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; 
+            user-select: none; 
+            -webkit-tap-highlight-color: transparent; /* No blue box */
+            touch-action: manipulation; /* No double tap zoom */
         }
         
         .phone { 
@@ -39,14 +41,27 @@
         .lockscreen { position: absolute; width: 100%; height: 100%; z-index: 500; display: flex; flex-direction: column; align-items: center; padding-top: 70px; color: white; background: rgba(0,0,0,0.1); transition: transform 0.6s var(--ios-spring), opacity 0.4s; }
         .lock-time { font-size: 58px; font-weight: 200; }
 
-        /* FINGERPRINT STYLE (Hidden by default) */
+        /* FINGERPRINT POSITIONED HIGHER - HIDDEN BY DEFAULT */
         .fingerprint-scanner {
-            margin-top: auto; margin-bottom: 120px; width: 65px; height: 65px;
-            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%;
-            display: none; justify-content: center; align-items: center;
-            font-size: 32px; cursor: pointer; animation: pulse 2s infinite; z-index: 600;
+            margin-top: auto;
+            margin-bottom: 120px; 
+            width: 65px;
+            height: 65px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: none; /* Changed from flex to none */
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            animation: pulse 2s infinite;
+            z-index: 600;
         }
+        .fingerprint-scanner:active { transform: scale(0.9); }
+
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
             70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
@@ -56,6 +71,7 @@
         .drag-btn { position: absolute; width: 60px; height: 60px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 30px; cursor: grab; z-index: 5; opacity: 0; transform: scale(0.5); transition: opacity 0.5s, transform 0.6s var(--ios-spring); touch-action: none; }
         .icon-normal-settings { background: linear-gradient(180deg, #b0b0b5 0%, #5e5e62 100%); }
         .icon-normal-cc { background: linear-gradient(180deg, #5856d6 0%, #3634a3 100%); }
+        .icon-glassy { background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
         
         #settingsBtn { top: 110px; left: 30px; }
         #ccIconBtn { top: 110px; left: 110px; }
@@ -100,11 +116,13 @@
         <div class="lockscreen" id="lockView">
             <div class="lock-time" id="clock">12:00</div>
             <div style="margin-top: 10px; opacity: 0.8;">Locked</div>
-            <div class="fingerprint-scanner" id="lockFingerprint" onclick="handleHomeBar()">☝️</div>
+            <div class="fingerprint-scanner" id="fp-icon" onclick="handleHomeBar()">☝️</div>
         </div>
 
         <div class="drag-btn icon-normal-settings" id="settingsBtn" onmousedown="setupDrag(event, this, 'settings')">⚙️</div>
         <div class="drag-btn icon-normal-cc" id="ccIconBtn" onmousedown="setupDrag(event, this, 'cc')">🎛️</div>
+
+        <input type="file" id="file-input" hidden accept="image/*" onchange="changeWallpaper(event)">
 
         <div class="app" id="settingsApp">
             <div id="p1" class="page">
@@ -112,18 +130,19 @@
                 <div class="item" onclick="showPage(6)">Screen Lock <span>›</span></div>
                 <div class="item" onclick="showPage(4)">About Phone <span>›</span></div>
                 <div class="item" onclick="showPage(2)">Animation Speed <span>›</span></div>
+                <div class="item" onclick="showPage(5)">Icons <span>›</span></div>
                 <div class="item" onclick="showPage(3)">Wallpaper <span>›</span></div>
             </div>
-            <div id="p2" class="page" style="display:none;"><div class="header">Speed</div><div class="item" onclick="setSpd('1.5s')">Slow</div><div class="item" onclick="setSpd('0.5s')">Normal</div><div class="item" onclick="setSpd('0.2s')">Fast</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
-            <div id="p3" class="page" style="display:none;"><div class="header">Wallpaper</div><div class="item" onclick="alert('Choose File Logic')">Choose Wallpaper +</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
-            <div id="p4" class="page" style="display:none;"><div class="header">About</div><div style="padding:40px; text-align:center;">FakeOS 1.0</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
+            <div id="p2" class="page" style="display:none;"><div class="header">Speed</div><div class="item" onclick="setSpd('1.5s')">Slow</div><div class="item" onclick="setSpd('0.5s')">Normal</div><div class="item" onclick="setSpd('0.2s')">Fast</div><div class="item" onclick="setSpd('0s')">Off</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
+            <div id="p3" class="page" style="display:none;"><div class="header">Wallpaper</div><div class="item" onclick="document.getElementById('file-input').click()">Choose Wallpaper +</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
+            <div id="p4" class="page" style="display:none;"><div class="header">About Phone</div><div style="padding:40px; text-align:center;"><h1 style="color:#000;">FakeOS 1.0</h1><p style="color:#666;">POCO X6 Pro</p></div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
+            <div id="p5" class="page" style="display:none;"><div class="header">Icons</div><div class="item" onclick="changeIconStyle('glassy')">Glassy</div><div class="item" onclick="changeIconStyle('normal')">Normal</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
             <div id="p6" class="page" style="display:none;">
                 <div class="header">Screen Lock</div>
-                <div class="item">
-                    Fingerprint 
-                    <div style="display:flex; gap:10px;">
-                        <span onclick="toggleFingerprint(true)" style="color:#34c759; font-weight:bold;">ON</span>
-                        <span onclick="toggleFingerprint(false)" style="color:#ff3b30; font-weight:bold;">OFF</span>
+                <div class="item">Fingerprint 
+                    <div style="display:flex; gap: 10px;">
+                        <span onclick="setFingerprint(true)" style="color:#34c759; font-weight: bold;">ON</span>
+                        <span onclick="setFingerprint(false)" style="color:#ff3b30; font-weight: bold;">OFF</span>
                     </div>
                 </div>
                 <div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div>
@@ -134,48 +153,82 @@
     </div>
 
     <script>
-        const phone = document.getElementById('phone'), blackOverlay = document.getElementById('blackOverlay');
-        let isPowerOn = true, fingerprintActive = false;
+        const phone = document.getElementById('phone'), blackOverlay = document.getElementById('blackOverlay'), wallpaper = document.getElementById('mainWallpaper');
+        let isPowerOn = true, isDragging = false;
 
-        function toggleFingerprint(state) {
-            fingerprintActive = state;
-            document.getElementById('lockFingerprint').style.display = state ? 'flex' : 'none';
+        // Toggle Fingerprint Visibility
+        function setFingerprint(visible) {
+            document.getElementById('fp-icon').style.display = visible ? 'flex' : 'none';
+        }
+
+        async function updateBattery() {
+            try {
+                const battery = await navigator.getBattery();
+                const level = Math.floor(battery.level * 100);
+                document.getElementById('battery-level').innerText = level + "%";
+                battery.addEventListener('levelchange', () => {
+                    document.getElementById('battery-level').innerText = Math.floor(battery.level * 100) + "%";
+                });
+            } catch (e) {
+                document.getElementById('battery-level').innerText = "100%";
+            }
+        }
+        updateBattery();
+
+        function handleDoubleTap(e) {
+            if (e.target.classList.contains('drag-btn') || e.target.classList.contains('fingerprint-scanner')) return;
+            if (!isPowerOn) { 
+                blackOverlay.classList.remove('screen-is-off'); 
+                isPowerOn = true; 
+            } else if (!phone.classList.contains('open') && phone.classList.contains('is-unlocked')) { 
+                blackOverlay.classList.add('screen-is-off'); 
+                phone.classList.remove('is-unlocked'); 
+                isPowerOn = false; 
+                toggleCC(false); 
+            }
         }
 
         function handleHomeBar() { 
-            if (isPowerOn && !phone.classList.contains('is-unlocked')) phone.classList.add('is-unlocked'); 
-            else { phone.classList.remove('open'); toggleCC(false); } 
-        }
-
-        function handleDoubleTap(e) {
-            if (e.target.classList.contains('drag-btn')) return;
-            if (!isPowerOn) { blackOverlay.classList.remove('screen-is-off'); isPowerOn = true; } 
-            else if (!phone.classList.contains('open') && phone.classList.contains('is-unlocked')) { 
-                blackOverlay.classList.add('screen-is-off'); phone.classList.remove('is-unlocked'); 
-                isPowerOn = false; toggleCC(false); 
-            }
+            if (isPowerOn && !phone.classList.contains('is-unlocked')) {
+                phone.classList.add('is-unlocked'); 
+            } else { 
+                phone.classList.remove('open'); 
+                toggleCC(false); 
+            } 
         }
 
         function setupDrag(e, el, type) {
             if (!phone.classList.contains('is-unlocked') || phone.classList.contains('open')) return;
-            let isDragging = false;
+            isDragging = false;
             let sX = e.clientX, sY = e.clientY, iX = el.offsetLeft, iY = el.offsetTop;
             const move = (ev) => {
                 isDragging = true;
                 el.style.left = Math.max(10, Math.min(iX + (ev.clientX - sX), 210)) + 'px';
                 el.style.top = Math.max(40, Math.min(iY + (ev.clientY - sY), 480)) + 'px';
+                if(type === 'settings') document.getElementById('settingsApp').style.transformOrigin = (parseInt(el.style.left)+30)+"px "+(parseInt(el.style.top)+30)+"px";
             };
             const stop = () => { 
-                document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', stop); 
-                if (!isDragging) { if(type === 'settings') phone.classList.add('open'); else toggleCC(true); } 
+                document.removeEventListener('mousemove', move); 
+                document.removeEventListener('mouseup', stop); 
+                if (!isDragging) { 
+                    if(type === 'settings') phone.classList.add('open'); 
+                    else toggleCC(true); 
+                } 
             };
-            document.addEventListener('mousemove', move); document.addEventListener('mouseup', stop);
+            document.addEventListener('mousemove', move); 
+            document.addEventListener('mouseup', stop);
         }
 
+        function changeBrightness(v) { document.documentElement.style.setProperty('--bright', v); }
+        function toggleCC(o) { if(isPowerOn && phone.classList.contains('is-unlocked')) document.getElementById('ccPanel').classList.toggle('cc-open', o); }
         function showPage(n) { document.querySelectorAll('.page').forEach(p => p.style.display = 'none'); document.getElementById('p' + n).style.display = 'block'; }
         function setSpd(t) { document.documentElement.style.setProperty('--spd', t); }
-        function toggleCC(o) { if(isPowerOn && phone.classList.contains('is-unlocked')) document.getElementById('ccPanel').classList.toggle('cc-open', o); }
-        function changeBrightness(v) { document.documentElement.style.setProperty('--bright', v); }
+        function changeWallpaper(e) { 
+            const r = new FileReader(); 
+            r.onload = (ev) => { wallpaper.style.backgroundImage = `url('${ev.target.result}')`; }; 
+            r.readAsDataURL(e.target.files[0]); 
+        }
+        function changeIconStyle(s) { document.querySelectorAll('.drag-btn').forEach(b => b.className = 'drag-btn ' + (s === 'glassy' ? 'icon-glassy' : (b.id==='settingsBtn'?'icon-normal-settings':'icon-normal-cc'))); }
         function updateTime() { const now = new Date(); const t = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0'); document.getElementById('clock').innerText = t; document.getElementById('st-time').innerText = t; }
         setInterval(updateTime, 1000); updateTime();
     </script>
