@@ -11,8 +11,8 @@
             margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; 
             background: #0a0a0a; font-family: -apple-system, sans-serif; overflow: hidden; 
             user-select: none; 
-            -webkit-tap-highlight-color: transparent; /* No blue box */
-            touch-action: manipulation; /* No double tap zoom */
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         
         .phone { 
@@ -21,17 +21,7 @@
         }
 
         .brightness-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; pointer-events: none; z-index: 3800; opacity: calc(1 - var(--bright)); }
-        
-        /* UPDATED PUNCH HOLE / DYNAMIC ISLAND */
-        .punch-hole { 
-            position: absolute; top: 12px; left: 50%; transform: translateX(-50%); 
-            width: 14px; height: 14px; background: #000; border-radius: 20px; 
-            z-index: 3900; border: 1px solid #1a1a1a; 
-            transition: all 0.4s var(--ios-spring);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0px; color: #34c759; white-space: nowrap; overflow: hidden;
-        }
-        .punch-hole.charging { width: 110px; height: 24px; font-size: 10px; gap: 5px; }
+        .punch-hole { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 14px; height: 14px; background: #000; border-radius: 50%; z-index: 3900; border: 1px solid #1a1a1a; }
         
         .status-bar { 
             position: absolute; top: 0; width: 100%; height: 35px; 
@@ -60,30 +50,14 @@
         .num-btn:active { background: rgba(255,255,255,0.3); }
 
         .fingerprint-scanner {
-            margin-top: auto;
-            margin-bottom: 120px; 
-            width: 65px;
-            height: 65px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            display: none; 
-            justify-content: center;
-            align-items: center;
-            font-size: 32px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            animation: pulse 2s infinite;
-            z-index: 600;
+            margin-top: auto; margin-bottom: 120px; 
+            width: 65px; height: 65px;
+            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%;
+            display: none; justify-content: center; align-items: center; font-size: 32px;
+            cursor: pointer; transition: transform 0.2s; animation: pulse 2s infinite; z-index: 600;
         }
-        .fingerprint-scanner:active { transform: scale(0.9); }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
-        }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
 
         .drag-btn { position: absolute; width: 60px; height: 60px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 30px; cursor: grab; z-index: 5; opacity: 0; transform: scale(0.5); transition: opacity 0.5s, transform 0.6s var(--ios-spring); touch-action: none; }
         .icon-normal-settings { background: linear-gradient(180deg, #b0b0b5 0%, #5e5e62 100%); }
@@ -95,27 +69,27 @@
         #ccIconBtn { top: 110px; left: 110px; }
         #calcIconBtn { top: 110px; left: 190px; }
 
-        .app { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #f2f2f7; z-index: 100; transform: scale(0); opacity: 0; pointer-events: none; transition: transform var(--spd) var(--ios-spring), opacity 0.3s; display: flex; flex-direction: column; border-radius: 40px; }
-        .glass-app { background: rgba(255,255,255,0.2) !important; backdrop-filter: blur(25px); color: white !important; }
+        .app { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #f2f2f7; z-index: 100; transform: scale(0); opacity: 0; pointer-events: none; transition: transform var(--spd) var(--ios-spring), opacity 0.3s; display: flex; flex-direction: column; border-radius: 40px; overflow: hidden; }
+        
+        /* Glassy App Fix - Only affects container, not content */
+        .app.is-glassy { background: rgba(255, 255, 255, 0.25) !important; backdrop-filter: blur(30px); }
+        .app.is-glassy .header, .app.is-glassy .item { color: #fff; background: transparent; border-bottom: 0.5px solid rgba(255,255,255,0.2); }
         
         .header { padding: 60px 20px 10px; font-weight: 800; font-size: 26px; color: #000; }
         .item { padding: 15px 18px; font-size: 16px; border-bottom: 0.5px solid #e5e5ea; cursor: pointer; color: #000; display: flex; justify-content: space-between; background: #fff; align-items: center; }
         
-        /* CALCULATOR GRID STYLES */
-        .calc-screen { height: 120px; display: flex; align-items: flex-end; justify-content: flex-end; padding: 20px; font-size: 40px; color: #000; }
-        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 15px; }
-        .calc-btn { height: 50px; background: #fff; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold; cursor: pointer; color: #000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .calc-btn.op { background: #ff9500; color: white; }
-        .glass-app .calc-btn { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.2); }
-        .glass-app .calc-screen { color: white; }
-        .glass-app .header { color: white; }
+        /* Calculator UI */
+        .calc-display { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; padding: 20px; font-size: 40px; color: inherit; }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 20px; background: rgba(0,0,0,0.05); }
+        .c-btn { height: 50px; background: #fff; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 18px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); color: #000; }
+        .app.is-glassy .c-btn { background: rgba(255,255,255,0.2); color: #fff; }
 
         .home-bar { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 100px; height: 5px; background: white; border-radius: 10px; z-index: 3500; cursor: pointer; }
         
         .is-unlocked .wallpaper { transform: scale(1); }
         .is-unlocked .drag-btn { opacity: 1; transform: scale(1); }
         .is-unlocked .lockscreen { transform: translateY(-100%); opacity: 0; }
-        .open .app { transform: scale(1); opacity: 1; pointer-events: auto; }
+        .open .app-active { transform: scale(1); opacity: 1; pointer-events: auto; }
         .open .wallpaper { filter: blur(30px); transform: scale(1.1) !important; }
     </style>
 </head>
@@ -123,10 +97,10 @@
 
     <div class="phone" id="phone" ondblclick="handleDoubleTap(event)">
         <div class="brightness-overlay"></div>
-        <div class="punch-hole" id="island">⚡ Charging...</div>
+        <div class="punch-hole"></div>
         <div class="status-bar">
             <span id="st-time">12:00</span>
-            <div class="battery-section" onclick="startCharging()">
+            <div class="battery-section" onclick="toggleCC(true)">
                 <span id="battery-level">--%</span>
                 <span id="battery-icon">🔋</span>
             </div>
@@ -172,8 +146,8 @@
              ontouchstart="setupDrag(event, this, 'cc')">🎛️</div>
 
         <div class="drag-btn icon-normal-calc" id="calcIconBtn" 
-             onmousedown="setupDrag(event, this, 'calculator')" 
-             ontouchstart="setupDrag(event, this, 'calculator')">➗</div>
+             onmousedown="setupDrag(event, this, 'calc')" 
+             ontouchstart="setupDrag(event, this, 'calc')">➗</div>
 
         <input type="file" id="file-input" hidden accept="image/*" onchange="changeWallpaper(event)">
 
@@ -188,7 +162,7 @@
             </div>
             <div id="p2" class="page" style="display:none;"><div class="header">Speed</div><div class="item" onclick="setSpd('1.5s')">Slow</div><div class="item" onclick="setSpd('0.5s')">Normal</div><div class="item" onclick="setSpd('0.2s')">Fast</div><div class="item" onclick="setSpd('0s')">Off</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
             <div id="p3" class="page" style="display:none;"><div class="header">Wallpaper</div><div class="item" onclick="document.getElementById('file-input').click()">Choose Wallpaper +</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
-            <div id="p4" class="page" style="display:none;"><div class="header">About Phone</div><div style="padding:40px; text-align:center;"><h1 style="color:#000;">FakeOS 1.0</h1><p style="color:#666;">POCO X6 Pro</p></div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
+            <div id="p4" class="page" style="display:none;"><div class="header">About Phone</div><div style="padding:40px; text-align:center;"><h1 style="color:inherit;">FakeOS 1.0</h1><p style="opacity:0.6;">POCO X6 Pro</p></div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
             <div id="p5" class="page" style="display:none;"><div class="header">Icons</div><div class="item" onclick="changeIconStyle('glassy')">Glassy</div><div class="item" onclick="changeIconStyle('normal')">Normal</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
             <div id="p6" class="page" style="display:none;">
                 <div class="header">Screen Lock</div>
@@ -199,19 +173,26 @@
             </div>
         </div>
 
-        <div class="app" id="calculatorApp">
+        <div class="app" id="calcApp">
             <div class="header">Calculator</div>
-            <div class="calc-screen" id="calcDisplay">0</div>
+            <div class="calc-display" id="calcScreen">0</div>
             <div class="calc-grid">
-                <div class="calc-btn op" onclick="pressCalc('C')">C</div>
-                <div class="calc-btn op" onclick="pressCalc('/')">÷</div>
-                <div class="calc-btn op" onclick="pressCalc('*')">×</div>
-                <div class="calc-btn op" onclick="pressCalc('DEL')">⌫</div>
-                <div class="calc-btn" onclick="pressCalc('7')">7</div><div class="calc-btn" onclick="pressCalc('8')">8</div><div class="calc-btn" onclick="pressCalc('9')">9</div><div class="calc-btn op" onclick="pressCalc('-')">-</div>
-                <div class="calc-btn" onclick="pressCalc('4')">4</div><div class="calc-btn" onclick="pressCalc('5')">5</div><div class="calc-btn" onclick="pressCalc('6')">6</div><div class="calc-btn op" onclick="pressCalc('+')">+</div>
-                <div class="calc-btn" onclick="pressCalc('1')">1</div><div class="calc-btn" onclick="pressCalc('2')">2</div><div class="calc-btn" onclick="pressCalc('3')">3</div><div class="calc-btn op" onclick="pressCalc('=')">=</div>
-                <div class="calc-btn" style="grid-column: span 2" onclick="pressCalc('0')">0</div>
-                <div class="calc-btn" onclick="pressCalc('.')">.</div>
+                <div class="c-btn" style="color:#ff9500" onclick="calcInput('C')">C</div>
+                <div class="c-btn" onclick="calcInput('/')">÷</div>
+                <div class="c-btn" onclick="calcInput('*')">×</div>
+                <div class="c-btn" onclick="calcInput('-')">−</div>
+                <div class="c-btn" onclick="calcInput('7')">7</div>
+                <div class="c-btn" onclick="calcInput('8')">8</div>
+                <div class="c-btn" onclick="calcInput('9')">9</div>
+                <div class="c-btn" onclick="calcInput('+')">+</div>
+                <div class="c-btn" onclick="calcInput('4')">4</div>
+                <div class="c-btn" onclick="calcInput('5')">5</div>
+                <div class="c-btn" onclick="calcInput('6')">6</div>
+                <div class="c-btn" style="background:#ff9500; color:#fff" onclick="calcInput('=')">=</div>
+                <div class="c-btn" onclick="calcInput('1')">1</div>
+                <div class="c-btn" onclick="calcInput('2')">2</div>
+                <div class="c-btn" onclick="calcInput('3')">3</div>
+                <div class="c-btn" onclick="calcInput('0')">0</div>
             </div>
         </div>
 
@@ -220,25 +201,14 @@
 
     <script>
         const phone = document.getElementById('phone'), blackOverlay = document.getElementById('blackOverlay'), wallpaper = document.getElementById('mainWallpaper');
-        let isPowerOn = true, isDragging = false, activePin = null, currentPinInput = "";
-        let calcExpr = "";
+        let isPowerOn = true, isDragging = false, activePin = null, currentPinInput = "", calcVal = "";
 
-        // CALCULATOR LOGIC
-        function pressCalc(v) {
-            const screen = document.getElementById('calcDisplay');
-            if(v === 'C') calcExpr = "";
-            else if(v === 'DEL') calcExpr = calcExpr.slice(0, -1);
-            else if(v === '=') { try { calcExpr = eval(calcExpr).toString(); } catch(e) { calcExpr = "Error"; } }
-            else calcExpr += v;
-            screen.innerText = calcExpr || "0";
-        }
-
-        // DYNAMIC ISLAND LOGIC
-        function startCharging() {
-            const island = document.getElementById('island');
-            island.classList.add('charging');
-            setTimeout(() => { island.classList.remove('charging'); }, 3000);
-            toggleCC(true);
+        function calcInput(v) {
+            const s = document.getElementById('calcScreen');
+            if(v === 'C') calcVal = "";
+            else if(v === '=') { try { calcVal = eval(calcVal).toString(); } catch { calcVal = "Error"; } }
+            else calcVal += v;
+            s.innerText = calcVal || "0";
         }
 
         function createPin() {
@@ -291,7 +261,10 @@
                 else phone.classList.add('is-unlocked');
             } else { 
                 phone.classList.remove('open'); 
-                document.querySelectorAll('.app').forEach(a => a.style.transform = "scale(0)");
+                document.querySelectorAll('.app').forEach(a => {
+                    a.classList.remove('app-active');
+                    a.style.transform = "scale(0)";
+                });
                 toggleCC(false); 
             } 
         }
@@ -318,10 +291,10 @@
                 document.removeEventListener(isTouch ? 'touchend' : 'mouseup', stop); 
                 if (!isDragging) { 
                     if(type === 'cc') { toggleCC(true); return; }
-                    phone.classList.add('open');
                     const targetApp = document.getElementById(type + 'App');
                     targetApp.style.transformOrigin = (parseInt(el.style.left)+30)+"px "+(parseInt(el.style.top)+30)+"px";
-                    targetApp.style.transform = "scale(1)";
+                    phone.classList.add('open');
+                    targetApp.classList.add('app-active');
                 } 
             };
             document.addEventListener(isTouch ? 'touchmove' : 'mousemove', move, { passive: false }); 
@@ -346,10 +319,10 @@
                     else b.className = 'drag-btn icon-normal-calc';
                 }
             });
-            // Glassy App Support
+            // Apply glass to App container but keep content readable via CSS logic
             document.querySelectorAll('.app').forEach(app => {
-                if(s === 'glassy') app.classList.add('glass-app');
-                else app.classList.remove('glass-app');
+                if(s === 'glassy') app.classList.add('is-glassy');
+                else app.classList.remove('is-glassy');
             });
         }
         function updateTime() { const now = new Date(); const t = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0'); document.getElementById('clock').innerText = t; document.getElementById('st-time').innerText = t; }
