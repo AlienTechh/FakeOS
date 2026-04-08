@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>FakeOS 1.0 - Real Battery</title>
+    <title>FakeOS 1.0 - Calculator & Island</title>
     <style>
         :root { --spd: 0.5s; --ios-spring: cubic-bezier(0.3, 1.2, 0.3, 1); --bright: 1; }
         
         body { 
             margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; 
             background: #0a0a0a; font-family: -apple-system, sans-serif; overflow: hidden; 
-            user-select: none; 
-            -webkit-tap-highlight-color: transparent; /* No blue box */
-            touch-action: manipulation; /* No double tap zoom */
+            user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; 
         }
         
         .phone { 
@@ -21,13 +19,17 @@
         }
 
         .brightness-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; pointer-events: none; z-index: 3800; opacity: calc(1 - var(--bright)); }
-        .punch-hole { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 14px; height: 14px; background: #000; border-radius: 50%; z-index: 3900; border: 1px solid #1a1a1a; }
         
-        .status-bar { 
-            position: absolute; top: 0; width: 100%; height: 35px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 0 20px; box-sizing: border-box; color: white; font-size: 11px; z-index: 3500; 
+        /* Dynamic Island / Punch Hole */
+        .punch-hole { 
+            position: absolute; top: 12px; left: 50%; transform: translateX(-50%); 
+            width: 14px; height: 14px; background: #000; border-radius: 50%; 
+            z-index: 3900; border: 1px solid #1a1a1a; transition: all 0.4s var(--ios-spring);
+            display: flex; align-items: center; justify-content: center; overflow: hidden; color: white; font-size: 0px;
         }
+        .island-active { width: 150px; height: 25px; border-radius: 20px; font-size: 10px; }
+
+        .status-bar { position: absolute; top: 0; width: 100%; height: 35px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-sizing: border-box; color: white; font-size: 11px; z-index: 3500; }
         .battery-section { display: flex; align-items: center; gap: 4px; cursor: pointer; }
 
         .control-center { position: absolute; top: 0; right: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(25px); z-index: 2500; transform: translateY(-100%); transition: transform 0.4s var(--ios-spring); display: flex; flex-direction: column; align-items: center; padding-top: 80px; gap: 20px; }
@@ -49,44 +51,33 @@
         .num-btn { width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; }
         .num-btn:active { background: rgba(255,255,255,0.3); }
 
-        .fingerprint-scanner {
-            margin-top: auto;
-            margin-bottom: 120px; 
-            width: 65px;
-            height: 65px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            display: none; 
-            justify-content: center;
-            align-items: center;
-            font-size: 32px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            animation: pulse 2s infinite;
-            z-index: 600;
-        }
-        .fingerprint-scanner:active { transform: scale(0.9); }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
-        }
+        .fingerprint-scanner { margin-top: auto; margin-bottom: 120px; width: 65px; height: 65px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 32px; cursor: pointer; animation: pulse 2s infinite; z-index: 600; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
 
         .drag-btn { position: absolute; width: 60px; height: 60px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 30px; cursor: grab; z-index: 5; opacity: 0; transform: scale(0.5); transition: opacity 0.5s, transform 0.6s var(--ios-spring); touch-action: none; }
         .icon-normal-settings { background: linear-gradient(180deg, #b0b0b5 0%, #5e5e62 100%); }
         .icon-normal-cc { background: linear-gradient(180deg, #5856d6 0%, #3634a3 100%); }
+        .icon-normal-calc { background: linear-gradient(180deg, #ff9f0a 0%, #d48400 100%); }
         .icon-glassy { background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
         
         #settingsBtn { top: 110px; left: 30px; }
         #ccIconBtn { top: 110px; left: 110px; }
+        #calcBtn { top: 110px; left: 190px; }
 
         .app { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #f2f2f7; z-index: 100; transform: scale(0); opacity: 0; pointer-events: none; transition: transform var(--spd) var(--ios-spring), opacity 0.3s; display: flex; flex-direction: column; border-radius: 40px; }
         .header { padding: 60px 20px 10px; font-weight: 800; font-size: 26px; color: #000; }
         .item { padding: 15px 18px; font-size: 16px; border-bottom: 0.5px solid #e5e5ea; cursor: pointer; color: #000; display: flex; justify-content: space-between; background: #fff; align-items: center; }
         
+        /* Calculator Specific Styles */
+        #calcApp { background: #000; color: white; }
+        .calc-display { flex: 1; display: flex; align-items: flex-end; justify-content: flex-end; padding: 20px; font-size: 48px; font-weight: 200; overflow: hidden; }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 20px; margin-bottom: 30px; }
+        .c-btn { height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; font-weight: 500; cursor: pointer; }
+        .c-gray { background: #a5a5a5; color: black; }
+        .c-dark { background: #333; color: white; }
+        .c-orange { background: #ff9f0a; color: white; }
+        .c-double { grid-column: span 2; border-radius: 30px; }
+
         .home-bar { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 100px; height: 5px; background: white; border-radius: 10px; z-index: 3500; cursor: pointer; }
         
         .is-unlocked .wallpaper { transform: scale(1); }
@@ -100,21 +91,13 @@
 
     <div class="phone" id="phone" ondblclick="handleDoubleTap(event)">
         <div class="brightness-overlay"></div>
-        <div class="punch-hole"></div>
+        <div class="punch-hole" id="island"></div>
         <div class="status-bar">
             <span id="st-time">12:00</span>
-            <div class="battery-section" onclick="toggleCC(true)">
+            <div class="battery-section" onclick="startCharging()">
                 <span id="battery-level">--%</span>
                 <span id="battery-icon">🔋</span>
             </div>
-        </div>
-
-        <div class="control-center" id="ccPanel">
-            <div class="cc-slider-box">
-                <div style="font-size:12px; margin-bottom:10px;">Brightness</div>
-                <input type="range" min="0.1" max="1" step="0.1" value="1" oninput="changeBrightness(this.value)" style="width:100%;">
-            </div>
-            <div style="color:white; margin-top:20px; cursor:pointer;" onclick="toggleCC(false)">Close ✕</div>
         </div>
 
         <div class="screen-off" id="blackOverlay"></div>
@@ -140,146 +123,115 @@
             <div style="margin-top: 30px; color: #007aff; cursor: pointer;" onclick="closePinPad()">Back</div>
         </div>
 
-        <div class="drag-btn icon-normal-settings" id="settingsBtn" 
-             onmousedown="setupDrag(event, this, 'settings')" 
-             ontouchstart="setupDrag(event, this, 'settings')">⚙️</div>
-             
-        <div class="drag-btn icon-normal-cc" id="ccIconBtn" 
-             onmousedown="setupDrag(event, this, 'cc')" 
-             ontouchstart="setupDrag(event, this, 'cc')">🎛️</div>
-
-        <input type="file" id="file-input" hidden accept="image/*" onchange="changeWallpaper(event)">
+        <div class="drag-btn icon-normal-settings" id="settingsBtn" onmousedown="setupDrag(event, this, 'settings')" ontouchstart="setupDrag(event, this, 'settings')">⚙️</div>
+        <div class="drag-btn icon-normal-cc" id="ccIconBtn" onmousedown="setupDrag(event, this, 'cc')" ontouchstart="setupDrag(event, this, 'cc')">🎛️</div>
+        <div class="drag-btn icon-normal-calc" id="calcBtn" onmousedown="setupDrag(event, this, 'calculator')" ontouchstart="setupDrag(event, this, 'calculator')">🔢</div>
 
         <div class="app" id="settingsApp">
             <div id="p1" class="page">
                 <div class="header">Settings</div>
                 <div class="item" onclick="showPage(6)">Screen Lock <span>›</span></div>
-                <div class="item" onclick="showPage(4)">About Phone <span>›</span></div>
-                <div class="item" onclick="showPage(2)">Animation Speed <span>›</span></div>
                 <div class="item" onclick="showPage(5)">Icons <span>›</span></div>
-                <div class="item" onclick="showPage(3)">Wallpaper <span>›</span></div>
+                <div class="item" style="color:#007aff;" onclick="phone.classList.remove('open')">Back Home</div>
             </div>
-            <div id="p2" class="page" style="display:none;"><div class="header">Speed</div><div class="item" onclick="setSpd('1.5s')">Slow</div><div class="item" onclick="setSpd('0.5s')">Normal</div><div class="item" onclick="setSpd('0.2s')">Fast</div><div class="item" onclick="setSpd('0s')">Off</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
-            <div id="p3" class="page" style="display:none;"><div class="header">Wallpaper</div><div class="item" onclick="document.getElementById('file-input').click()">Choose Wallpaper +</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
-            <div id="p4" class="page" style="display:none;"><div class="header">About Phone</div><div style="padding:40px; text-align:center;"><h1 style="color:#000;">FakeOS 1.0</h1><p style="color:#666;">POCO X6 Pro</p></div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
             <div id="p5" class="page" style="display:none;"><div class="header">Icons</div><div class="item" onclick="changeIconStyle('glassy')">Glassy</div><div class="item" onclick="changeIconStyle('normal')">Normal</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
-            <div id="p6" class="page" style="display:none;">
-                <div class="header">Screen Lock</div>
-                <div class="item">Fingerprint <div style="display:flex; gap: 10px;"><span onclick="setFingerprint(true)" style="color:#34c759; font-weight: bold;">ON</span><span onclick="setFingerprint(false)" style="color:#ff3b30; font-weight: bold;">OFF</span></div></div>
-                <div class="item" id="createPinBtn" onclick="createPin()">Create a PIN <span style="color:#007aff;">+</span></div>
-                <div class="item" id="turnOffPinBtn" style="display:none;" onclick="turnOffPin()">Turn off PIN <span style="color:#ff3b30;">✕</span></div>
-                <div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div>
+            <div id="p6" class="page" style="display:none;"><div class="header">Screen Lock</div><div class="item" id="createPinBtn" onclick="createPin()">Create a PIN <span>+</span></div><div class="item" id="turnOffPinBtn" style="display:none;" onclick="turnOffPin()">Turn off PIN</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
+        </div>
+
+        <div class="app" id="calcApp">
+            <div class="calc-display" id="calcScreen">0</div>
+            <div class="calc-grid">
+                <div class="c-btn c-gray" onclick="calcAction('C')">AC</div><div class="c-btn c-gray">+/-</div><div class="c-btn c-gray">%</div><div class="c-btn c-orange" onclick="calcAction('/')">÷</div>
+                <div class="c-btn c-dark" onclick="calcAction('7')">7</div><div class="c-btn c-dark" onclick="calcAction('8')">8</div><div class="c-btn c-dark" onclick="calcAction('9')">9</div><div class="c-btn c-orange" onclick="calcAction('*')">×</div>
+                <div class="c-btn c-dark" onclick="calcAction('4')">4</div><div class="c-btn c-dark" onclick="calcAction('5')">5</div><div class="c-btn c-dark" onclick="calcAction('6')">6</div><div class="c-btn c-orange" onclick="calcAction('-')">-</div>
+                <div class="c-btn c-dark" onclick="calcAction('1')">1</div><div class="c-btn c-dark" onclick="calcAction('2')">2</div><div class="c-btn c-dark" onclick="calcAction('3')">3</div><div class="c-btn c-orange" onclick="calcAction('+')">+</div>
+                <div class="c-btn c-dark c-double" onclick="calcAction('0')">0</div><div class="c-btn c-dark">.</div><div class="c-btn c-orange" onclick="calcAction('=')">=</div>
             </div>
         </div>
 
-        <div class="home-bar" id="bottomBar" onclick="handleHomeBar()"></div>
+        <div class="home-bar" onclick="handleHomeBar()"></div>
     </div>
 
     <script>
-        const phone = document.getElementById('phone'), blackOverlay = document.getElementById('blackOverlay'), wallpaper = document.getElementById('mainWallpaper');
-        let isPowerOn = true, isDragging = false, activePin = null, currentPinInput = "";
+        const phone = document.getElementById('phone'), blackOverlay = document.getElementById('blackOverlay'), island = document.getElementById('island');
+        let isPowerOn = true, activePin = null, currentPinInput = "", currentCalc = "0";
 
-        function createPin() {
-            let p = prompt("Enter a 4-digit PIN:");
-            if(p && p.length === 4 && !isNaN(p)) {
-                activePin = p;
-                document.getElementById('createPinBtn').style.display = 'none';
-                document.getElementById('turnOffPinBtn').style.display = 'flex';
-                alert("PIN set successfully");
-            }
+        // Dynamic Island
+        function startCharging() {
+            island.classList.add('island-active');
+            island.innerText = "⚡ Charging " + document.getElementById('battery-level').innerText;
+            setTimeout(() => { island.classList.remove('island-active'); island.innerText = ""; }, 3000);
         }
-        function turnOffPin() { activePin = null; document.getElementById('createPinBtn').style.display = 'flex'; document.getElementById('turnOffPinBtn').style.display = 'none'; }
-        function inputPin(num) {
-            if(currentPinInput.length < 4) {
-                currentPinInput += num; updatePinDots();
-                if(currentPinInput.length === 4) {
-                    if(currentPinInput === activePin) { phone.classList.add('is-unlocked'); closePinPad(); }
-                    else {
-                        const status = document.getElementById('pinStatus');
-                        status.innerText = "Wrong PIN"; status.style.color = "#ff3b30";
-                        setTimeout(() => { status.innerText = "Enter PIN"; status.style.color = "white"; currentPinInput = ""; updatePinDots(); }, 2000);
-                    }
+
+        // Calculator Logic
+        function calcAction(val) {
+            const screen = document.getElementById('calcScreen');
+            if(val === 'C') currentCalc = "0";
+            else if(val === '=') { try { currentCalc = eval(currentCalc).toString(); } catch { currentCalc = "Error"; } }
+            else { currentCalc = currentCalc === "0" ? val : currentCalc + val; }
+            screen.innerText = currentCalc;
+        }
+
+        // App/Drags
+        function setupDrag(e, el, type) {
+            if (!phone.classList.contains('is-unlocked') || phone.classList.contains('open')) return;
+            let isTouch = e.type === 'touchstart', isDragging = false;
+            let sX = isTouch ? e.touches[0].clientX : e.clientX, sY = isTouch ? e.touches[0].clientY : e.clientY;
+            let iX = el.offsetLeft, iY = el.offsetTop;
+            const move = (ev) => {
+                isDragging = true;
+                let cX = isTouch ? ev.touches[0].clientX : ev.clientX, cY = isTouch ? ev.touches[0].clientY : ev.clientY;
+                el.style.left = Math.max(10, Math.min(iX + (cX - sX), 210)) + 'px';
+                el.style.top = Math.max(40, Math.min(iY + (cY - sY), 480)) + 'px';
+            };
+            const stop = () => {
+                document.removeEventListener(isTouch?'touchmove':'mousemove', move);
+                document.removeEventListener(isTouch?'touchend':'mouseup', stop);
+                if(!isDragging) {
+                    if(type === 'settings') { phone.classList.add('open'); document.getElementById('settingsApp').style.opacity = 1; document.getElementById('settingsApp').style.pointerEvents = 'auto'; document.getElementById('calcApp').style.opacity = 0; }
+                    else if(type === 'calculator') { phone.classList.add('open'); document.getElementById('calcApp').style.opacity = 1; document.getElementById('calcApp').style.pointerEvents = 'auto'; document.getElementById('settingsApp').style.opacity = 0; }
                 }
-            }
-        }
-        function updatePinDots() { const dots = document.querySelectorAll('#pinDots .dot'); dots.forEach((dot, i) => dot.classList.toggle('active', i < currentPinInput.length)); }
-        function closePinPad() { document.getElementById('pinPad').style.display = 'none'; currentPinInput = ""; updatePinDots(); }
-        function setFingerprint(visible) { document.getElementById('fp-icon').style.display = visible ? 'flex' : 'none'; }
-
-        async function updateBattery() {
-            try {
-                const battery = await navigator.getBattery();
-                document.getElementById('battery-level').innerText = Math.floor(battery.level * 100) + "%";
-                battery.addEventListener('levelchange', () => { document.getElementById('battery-level').innerText = Math.floor(battery.level * 100) + "%"; });
-            } catch (e) { document.getElementById('battery-level').innerText = "100%"; }
-        }
-        updateBattery();
-
-        function handleDoubleTap(e) {
-            if (e.target.classList.contains('drag-btn') || e.target.classList.contains('fingerprint-scanner') || e.target.classList.contains('num-btn')) return;
-            if (!isPowerOn) { blackOverlay.classList.remove('screen-is-off'); isPowerOn = true; } 
-            else if (!phone.classList.contains('open') && phone.classList.contains('is-unlocked')) { 
-                blackOverlay.classList.add('screen-is-off'); phone.classList.remove('is-unlocked'); isPowerOn = false; toggleCC(false); closePinPad();
-            }
+            };
+            document.addEventListener(isTouch?'touchmove':'mousemove', move);
+            document.addEventListener(isTouch?'touchend':'mouseup', stop);
         }
 
+        // Generic handlers
         function handleHomeBar() { 
             if (isPowerOn && !phone.classList.contains('is-unlocked')) {
                 if(activePin) document.getElementById('pinPad').style.display = 'flex';
                 else phone.classList.add('is-unlocked');
-            } else { phone.classList.remove('open'); toggleCC(false); } 
+            } else { phone.classList.remove('open'); } 
         }
 
-        // MOBILE COMPATIBLE DRAG LOGIC
-        function setupDrag(e, el, type) {
-            if (!phone.classList.contains('is-unlocked') || phone.classList.contains('open')) return;
-            isDragging = false;
-            
-            // Determine if touch or mouse
-            const isTouch = e.type === 'touchstart';
-            let startX = isTouch ? e.touches[0].clientX : e.clientX;
-            let startY = isTouch ? e.touches[0].clientY : e.clientY;
-            let initX = el.offsetLeft;
-            let initY = el.offsetTop;
-
-            const move = (ev) => {
-                isDragging = true;
-                const currentX = isTouch ? ev.touches[0].clientX : ev.clientX;
-                const currentY = isTouch ? ev.touches[0].clientY : ev.clientY;
-                
-                el.style.left = Math.max(10, Math.min(initX + (currentX - startX), 210)) + 'px';
-                el.style.top = Math.max(40, Math.min(initY + (currentY - startY), 480)) + 'px';
-                
-                if(type === 'settings') {
-                    document.getElementById('settingsApp').style.transformOrigin = (parseInt(el.style.left)+30)+"px "+(parseInt(el.style.top)+30)+"px";
-                }
-            };
-
-            const stop = () => { 
-                document.removeEventListener(isTouch ? 'touchmove' : 'mousemove', move); 
-                document.removeEventListener(isTouch ? 'touchend' : 'mouseup', stop); 
-                if (!isDragging) { 
-                    if(type === 'settings') phone.classList.add('open'); 
-                    else toggleCC(true); 
-                } 
-            };
-
-            document.addEventListener(isTouch ? 'touchmove' : 'mousemove', move, { passive: false }); 
-            document.addEventListener(isTouch ? 'touchend' : 'mouseup', stop);
+        function handleDoubleTap(e) {
+            if (e.target.closest('.drag-btn') || e.target.closest('.num-btn')) return;
+            if (!isPowerOn) { blackOverlay.classList.remove('screen-is-off'); isPowerOn = true; }
+            else if (phone.classList.contains('is-unlocked') && !phone.classList.contains('open')) {
+                blackOverlay.classList.add('screen-is-off'); phone.classList.remove('is-unlocked'); isPowerOn = false;
+            }
         }
 
-        function changeBrightness(v) { document.documentElement.style.setProperty('--bright', v); }
-        function toggleCC(o) { if(isPowerOn && phone.classList.contains('is-unlocked')) document.getElementById('ccPanel').classList.toggle('cc-open', o); }
-        function showPage(n) { document.querySelectorAll('.page').forEach(p => p.style.display = 'none'); document.getElementById('p' + n).style.display = 'block'; }
-        function setSpd(t) { document.documentElement.style.setProperty('--spd', t); }
-        function changeWallpaper(e) { 
-            const r = new FileReader(); 
-            r.onload = (ev) => { wallpaper.style.backgroundImage = `url('${ev.target.result}')`; }; 
-            r.readAsDataURL(e.target.files[0]); 
+        function changeIconStyle(s) { 
+            document.querySelectorAll('.drag-btn').forEach(b => {
+                const base = b.id === 'settingsBtn' ? 'icon-normal-settings' : (b.id === 'calcBtn' ? 'icon-normal-calc' : 'icon-normal-cc');
+                b.className = 'drag-btn ' + (s === 'glassy' ? 'icon-glassy' : base);
+            });
         }
-        function changeIconStyle(s) { document.querySelectorAll('.drag-btn').forEach(b => b.className = 'drag-btn ' + (s === 'glassy' ? 'icon-glassy' : (b.id==='settingsBtn'?'icon-normal-settings':'icon-normal-cc'))); }
-        function updateTime() { const now = new Date(); const t = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0'); document.getElementById('clock').innerText = t; document.getElementById('st-time').innerText = t; }
-        setInterval(updateTime, 1000); updateTime();
+
+        // PIN & UI
+        function createPin() { let p = prompt("Set 4-digit PIN:"); if(p && p.length===4) { activePin=p; document.getElementById('createPinBtn').style.display='none'; document.getElementById('turnOffPinBtn').style.display='flex'; } }
+        function turnOffPin() { activePin=null; document.getElementById('createPinBtn').style.display='flex'; document.getElementById('turnOffPinBtn').style.display='none'; }
+        function inputPin(n) { currentPinInput += n; updateDots(); if(currentPinInput.length===4) { if(currentPinInput===activePin) { phone.classList.add('is-unlocked'); closePinPad(); } else { currentPinInput=""; updateDots(); } } }
+        function updateDots() { const dots = document.querySelectorAll('.dot'); dots.forEach((d,i) => d.classList.toggle('active', i<currentPinInput.length)); }
+        function closePinPad() { document.getElementById('pinPad').style.display='none'; currentPinInput=""; updateDots(); }
+        function showPage(n) { document.querySelectorAll('.page').forEach(p=>p.style.display='none'); document.getElementById('p'+n).style.display='block'; }
+        
+        async function updateBattery() {
+            try { const b = await navigator.getBattery(); document.getElementById('battery-level').innerText = Math.floor(b.level*100)+"%"; } catch(e) { document.getElementById('battery-level').innerText="100%"; }
+        }
+        updateBattery();
+        setInterval(() => { const n = new Date(); const t = n.getHours().toString().padStart(2,'0') + ":" + n.getMinutes().toString().padStart(2,'0'); document.getElementById('clock').innerText = t; document.getElementById('st-time').innerText = t; }, 1000);
     </script>
 </body>
 </html>
