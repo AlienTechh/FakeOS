@@ -2,11 +2,16 @@
 <html lang="ka">
 <head>
     <meta charset="UTF-8">
-    <!-- აი ეს არის ის ტეგი, რომელიც აჩერებს ზუმირებას მობილურზე -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <title>FakeOS 1.0 - Real Battery</title>
     <style>
+        /* ეს ნაწილი აშორებს ლურჯ ფონს დაჭერისას */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
         :root { --spd: 0.5s; --ios-spring: cubic-bezier(0.3, 1.2, 0.3, 1); --bright: 1; }
         body { margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; background: #0a0a0a; font-family: -apple-system, sans-serif; overflow: hidden; user-select: none; touch-action: manipulation; }
         
@@ -18,7 +23,6 @@
         .brightness-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; pointer-events: none; z-index: 3800; opacity: calc(1 - var(--bright)); }
         .punch-hole { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 14px; height: 14px; background: #000; border-radius: 50%; z-index: 3900; border: 1px solid #1a1a1a; }
         
-        /* Status Bar ბატარეით */
         .status-bar { 
             position: absolute; top: 0; width: 100%; height: 35px; 
             display: flex; justify-content: space-between; align-items: center; 
@@ -56,54 +60,4 @@
     </style>
 </head>
 <body>
-
-    <div class="phone" id="phone" ondblclick="handleDoubleTap(event)">
-        <div class="brightness-overlay"></div>
-        <div class="punch-hole"></div>
-        <div class="status-bar">
-            <span id="st-time">12:00</span>
-            <div class="battery-section" onclick="toggleCC(true)">
-                <span id="battery-level">--%</span>
-                <span id="battery-icon">🔋</span>
-            </div>
-        </div>
-
-        <div class="control-center" id="ccPanel">
-            <div class="cc-slider-box">
-                <div style="font-size:12px; margin-bottom:10px;">Brightness</div>
-                <input type="range" min="0.1" max="1" step="0.1" value="1" oninput="changeBrightness(this.value)" style="width:100%;">
-            </div>
-            <div style="color:white; margin-top:20px; cursor:pointer;" onclick="toggleCC(false)">Close ✕</div>
-        </div>
-
-        <div class="screen-off" id="blackOverlay"></div>
-        <div class="wallpaper" id="mainWallpaper"></div>
-        <div class="lockscreen" id="lockView"><div class="lock-time" id="clock">12:00</div><div style="margin-top: 10px; opacity: 0.8;">Swipe up to unlock</div></div>
-
-        <div class="drag-btn icon-normal-settings" id="settingsBtn" onmousedown="setupDrag(event, this, 'settings')">⚙️</div>
-        <div class="drag-btn icon-normal-cc" id="ccIconBtn" onmousedown="setupDrag(event, this, 'cc')">🎛️</div>
-
-        <input type="file" id="file-input" hidden accept="image/*" onchange="changeWallpaper(event)">
-
-        <div class="app" id="settingsApp">
-            <div id="p1" class="page">
-                <div class="header">Settings</div>
-                <div class="item" onclick="showPage(4)">About Phone <span>›</span></div>
-                <div class="item" onclick="showPage(2)">Animation Speed <span>›</span></div>
-                <div class="item" onclick="showPage(5)">Icons <span>›</span></div>
-                <div class="item" onclick="showPage(3)">Wallpaper <span>›</span></div>
-            </div>
-            <div id="p2" class="page" style="display:none;"><div class="header">Speed</div><div class="item" onclick="setSpd('1.5s')">Slow</div><div class="item" onclick="setSpd('0.5s')">Normal</div><div class="item" onclick="setSpd('0.2s')">Fast</div><div class="item" onclick="setSpd('0s')">Off</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
-            <div id="p3" class="page" style="display:none;"><div class="header">Wallpaper</div><div class="item" onclick="document.getElementById('file-input').click()">Choose Wallpaper +</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
-            <div id="p4" class="page" style="display:none;"><div class="header">About Phone</div><div style="padding:40px; text-align:center;"><h1 style="color:#000;">FakeOS 1.0</h1><p style="color:#666;">POCO X6 Pro</p></div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
-            <div id="p5" class="page" style="display:none;"><div class="header">Icons</div><div class="item" onclick="changeIconStyle('glassy')">Glassy</div><div class="item" onclick="changeIconStyle('normal')">Normal</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
-        </div>
-
-        <div class="home-bar" onclick="handleHomeBar()"></div>
-    </div>
-
-    <script>
-        // შენი JavaScript კოდი გაგრძელდება აქ...
-    </script>
-</body>
-</html>
+    <!-- აქ გაგრძელდება თქვენი HTML სტრუქტურა -->
