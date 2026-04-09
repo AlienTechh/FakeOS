@@ -31,28 +31,37 @@
             overflow: hidden; user-select: none; -webkit-tap-highlight-color: transparent; 
             touch-action: manipulation;
         }
+
+        /* NEW CONTAINER to hold phone + button */
+        .device-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
         
         .phone { 
             width: 290px; height: 600px; background: #000; 
             border: 10px solid #2c2c2e; border-radius: 54px; 
             position: relative; overflow: hidden; 
             box-shadow: 0 50px 100px rgba(0,0,0,0.9);
+            z-index: 2;
         }
 
-        /* Red Power Button Style */
+        /* RED POWER BUTTON - Placed outside the phone div */
         .power-btn {
             position: absolute;
-            right: -12px;
+            right: -16px; /* Pops out from the right */
             top: 140px;
-            width: 6px;
+            width: 12px;
             height: 60px;
-            background: #ff3b30;
+            background: linear-gradient(to right, #cc2b22, #ff3b30);
             border-radius: 0 5px 5px 0;
             cursor: pointer;
-            z-index: 5000;
+            z-index: 1;
             transition: transform 0.1s;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
         }
-        .power-btn:active { transform: translateX(-2px); }
+        .power-btn:active { transform: translateX(-4px); }
 
         .boot-screen {
             position: absolute; inset: 0; background: #000; z-index: 9999;
@@ -146,116 +155,119 @@
 </head>
 <body id="mainBody">
 
-    <div class="phone" id="phone">
-
+    <div class="device-wrapper">
+        
         <div class="power-btn" onclick="togglePower()"></div>
 
-        <div class="boot-screen" id="bootScreen">
-            <div class="boot-logo">FakeOS</div>
-            <div class="boot-spinner"></div>
+        <div class="phone" id="phone">
+
+            <div class="boot-screen" id="bootScreen">
+                <div class="boot-logo">FakeOS</div>
+                <div class="boot-spinner"></div>
+            </div>
+
+            <div class="aod-layer" id="aod">
+                <div class="aod-time" id="aodTime">00:00</div>
+                <div class="aod-date" id="aodDate">Thursday, April 9</div>
+            </div>
+
+            <audio id="sound-unlock" src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3"></audio>
+            <audio id="sound-lock" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+
+            <div class="brightness-overlay"></div>
+            <div class="punch-hole"></div>
+            <div class="multitasking-overlay" onclick="exitRecentsToHome()"></div>
+            <div id="no-apps-msg">No Open Apps</div>
+
+            <div class="status-bar">
+                <span id="st-time">12:00</span>
+                <div class="battery-section" onclick="toggleCC(true)">
+                    <span id="battery-level">--%</span>
+                    <span id="battery-icon"></span>
+                </div>
+            </div>
+
+            <div class="control-center" id="ccPanel">
+                <div class="cc-slider-box">
+                    <div style="font-size:14px; font-weight:600; margin-bottom:12px;">Brightness</div>
+                    <input type="range" min="0.1" max="1" step="0.1" value="1" oninput="changeBrightness(this.value)" style="width:100%;">
+                </div>
+                <div class="cc-btn" onclick="toggleDarkMode()"> Appearance: <span id="mode-text">Light</span></div>
+                <div class="cc-btn" style="background:rgba(255,255,255,0.1); margin-top:10px;" onclick="toggleCC(false)">Done</div>
+            </div>
+
+            <div class="screen-off" id="blackOverlay"></div>
+            <div class="wallpaper" id="mainWallpaper"></div>
+            
+            <div class="lockscreen" id="lockView">
+                <div class="lock-time" id="clock">12:00</div>
+                <div style="margin-top: 5px; opacity: 0.7; font-size: 14px;">Hold Home Bar to Unlock</div>
+                <div class="fingerprint-scanner" id="fp-icon" onclick="unlockByFingerprint()"></div>
+            </div>
+
+            <div class="pin-pad" id="pinPad">
+                <div id="pinStatus" style="margin-bottom: 25px; font-weight: 500; font-size: 18px;">Enter Passcode</div>
+                <div class="pin-dots" id="pinDots">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                </div>
+                <div class="num-grid">
+                    <div class="num-btn" onclick="inputPin(1)">1</div><div class="num-btn" onclick="inputPin(2)">2</div><div class="num-btn" onclick="inputPin(3)">3</div>
+                    <div class="num-btn" onclick="inputPin(4)">4</div><div class="num-btn" onclick="inputPin(5)">5</div><div class="num-btn" onclick="inputPin(6)">6</div>
+                    <div class="num-btn" onclick="inputPin(7)">7</div><div class="num-btn" onclick="inputPin(8)">8</div><div class="num-btn" onclick="inputPin(9)">9</div>
+                    <div></div><div class="num-btn" onclick="inputPin(0)">0</div>
+                </div>
+                <div style="margin-top: 40px; color: #fff; font-weight:600; cursor: pointer; opacity: 0.8;" onclick="closePinPad()">Cancel</div>
+            </div>
+
+            <div class="drag-btn icon-normal-settings" id="settingsBtn" 
+                 onmousedown="setupDrag(event, this, 'settings')" 
+                 ontouchstart="setupDrag(event, this, 'settings')"></div>
+                 
+            <div class="drag-btn icon-normal-cc" id="ccIconBtn" 
+                 onmousedown="setupDrag(event, this, 'cc')" 
+                 ontouchstart="setupDrag(event, this, 'cc')"></div>
+
+            <input type="file" id="file-input" hidden accept="image/*" onchange="changeWallpaper(event)">
+
+            <div class="app" id="settingsApp">
+                <div class="header">Settings</div>
+                <div id="p1" class="page">
+                    <div class="item" onclick="showPage(6)">Screen Lock <span>›</span></div>
+                    <div class="item" onclick="showPage(4)">About Phone <span>›</span></div>
+                    <div class="item" onclick="showPage(2)">Animation Speed <span>›</span></div>
+                    <div class="item" onclick="showPage(5)">Icons <span>›</span></div>
+                    <div class="item" onclick="showPage(7)">Customization <span>›</span></div>
+                </div>
+                <div id="p2" class="page" style="display:none;"><div class="item" onclick="setSpd('1.5s')">Slow</div><div class="item" onclick="setSpd('0.5s')">Normal</div><div class="item" onclick="setSpd('0.2s')">Fast</div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
+                <div id="p3" class="page" style="display:none;"><div class="item" onclick="document.getElementById('file-input').click()">Choose Wallpaper +</div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(7)">Back</div></div>
+                <div id="p4" class="page" style="display:none;"><div style="padding:40px; text-align:center;"><h1 style="color:var(--text-main);">FakeOS 1.0</h1><p style="color:var(--text-main); opacity:0.6;">POCO X6 Pro Edition</p></div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
+                <div id="p5" class="page" style="display:none;"><div class="item" onclick="changeIconStyle('glassy')">Glassmorphism</div><div class="item" onclick="changeIconStyle('normal')">Classic</div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
+                <div id="p6" class="page" style="display:none;">
+                    <div class="item">Fingerprint <div style="display:flex; gap: 12px;"><span onclick="setFingerprint(true)" style="color:#34c759; font-weight: bold;">ON</span><span onclick="setFingerprint(false)" style="color:#ff3b30; font-weight: bold;">OFF</span></div></div>
+                    <div class="item" id="createPinBtn" onclick="createPin()">Create a PIN <span style="color:var(--ios-blue);">+</span></div>
+                    <div class="item" id="turnOffPinBtn" style="display:none;" onclick="turnOffPin()">Turn off PIN <span style="color:#ff3b30;">✕</span></div>
+                    <div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div>
+                </div>
+                <div id="p7" class="page" style="display:none;">
+                    <div class="item" onclick="showPage(3)">Wallpaper <span>›</span></div>
+                    <div class="item" onclick="showPage(8)">AOD Customization <span>›</span></div>
+                    <div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div>
+                </div>
+                <div id="p8" class="page" style="display:none;">
+                    <div class="item" onclick="setAODStyle(100)">Clock Style: Thin</div>
+                    <div class="item" onclick="setAODStyle(400)">Clock Style: Standard</div>
+                    <div class="item" onclick="setAODStyle(800)">Clock Style: Bold</div>
+                    <div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(7)">Back</div>
+                </div>
+            </div>
+            
+            <div id="kill-app-btn" onclick="killApp()">✕</div>
+            <div class="app-card-trigger" id="cardTrigger" onclick="exitRecentsToApp()"></div>
+
+            <div class="home-bar" id="bottomBar" 
+                 onmousedown="handleHomeStart()" onmouseup="handleHomeEnd()"
+                 ontouchstart="handleHomeStart()" ontouchend="handleHomeEnd()"></div>
         </div>
-
-        <div class="aod-layer" id="aod">
-            <div class="aod-time" id="aodTime">00:00</div>
-            <div class="aod-date" id="aodDate">Thursday, April 9</div>
-        </div>
-
-        <audio id="sound-unlock" src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3"></audio>
-        <audio id="sound-lock" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
-
-        <div class="brightness-overlay"></div>
-        <div class="punch-hole"></div>
-        <div class="multitasking-overlay" onclick="exitRecentsToHome()"></div>
-        <div id="no-apps-msg">No Open Apps</div>
-
-        <div class="status-bar">
-            <span id="st-time">12:00</span>
-            <div class="battery-section" onclick="toggleCC(true)">
-                <span id="battery-level">--%</span>
-                <span id="battery-icon"></span>
-            </div>
-        </div>
-
-        <div class="control-center" id="ccPanel">
-            <div class="cc-slider-box">
-                <div style="font-size:14px; font-weight:600; margin-bottom:12px;">Brightness</div>
-                <input type="range" min="0.1" max="1" step="0.1" value="1" oninput="changeBrightness(this.value)" style="width:100%;">
-            </div>
-            <div class="cc-btn" onclick="toggleDarkMode()"> Appearance: <span id="mode-text">Light</span></div>
-            <div class="cc-btn" style="background:rgba(255,255,255,0.1); margin-top:10px;" onclick="toggleCC(false)">Done</div>
-        </div>
-
-        <div class="screen-off" id="blackOverlay"></div>
-        <div class="wallpaper" id="mainWallpaper"></div>
-        
-        <div class="lockscreen" id="lockView">
-            <div class="lock-time" id="clock">12:00</div>
-            <div style="margin-top: 5px; opacity: 0.7; font-size: 14px;">Hold Home Bar to Unlock</div>
-            <div class="fingerprint-scanner" id="fp-icon" onclick="unlockByFingerprint()"></div>
-        </div>
-
-        <div class="pin-pad" id="pinPad">
-            <div id="pinStatus" style="margin-bottom: 25px; font-weight: 500; font-size: 18px;">Enter Passcode</div>
-            <div class="pin-dots" id="pinDots">
-                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-            </div>
-            <div class="num-grid">
-                <div class="num-btn" onclick="inputPin(1)">1</div><div class="num-btn" onclick="inputPin(2)">2</div><div class="num-btn" onclick="inputPin(3)">3</div>
-                <div class="num-btn" onclick="inputPin(4)">4</div><div class="num-btn" onclick="inputPin(5)">5</div><div class="num-btn" onclick="inputPin(6)">6</div>
-                <div class="num-btn" onclick="inputPin(7)">7</div><div class="num-btn" onclick="inputPin(8)">8</div><div class="num-btn" onclick="inputPin(9)">9</div>
-                <div></div><div class="num-btn" onclick="inputPin(0)">0</div>
-            </div>
-            <div style="margin-top: 40px; color: #fff; font-weight:600; cursor: pointer; opacity: 0.8;" onclick="closePinPad()">Cancel</div>
-        </div>
-
-        <div class="drag-btn icon-normal-settings" id="settingsBtn" 
-             onmousedown="setupDrag(event, this, 'settings')" 
-             ontouchstart="setupDrag(event, this, 'settings')"></div>
-             
-        <div class="drag-btn icon-normal-cc" id="ccIconBtn" 
-             onmousedown="setupDrag(event, this, 'cc')" 
-             ontouchstart="setupDrag(event, this, 'cc')"></div>
-
-        <input type="file" id="file-input" hidden accept="image/*" onchange="changeWallpaper(event)">
-
-        <div class="app" id="settingsApp">
-            <div class="header">Settings</div>
-            <div id="p1" class="page">
-                <div class="item" onclick="showPage(6)">Screen Lock <span>›</span></div>
-                <div class="item" onclick="showPage(4)">About Phone <span>›</span></div>
-                <div class="item" onclick="showPage(2)">Animation Speed <span>›</span></div>
-                <div class="item" onclick="showPage(5)">Icons <span>›</span></div>
-                <div class="item" onclick="showPage(7)">Customization <span>›</span></div>
-            </div>
-            <div id="p2" class="page" style="display:none;"><div class="item" onclick="setSpd('1.5s')">Slow</div><div class="item" onclick="setSpd('0.5s')">Normal</div><div class="item" onclick="setSpd('0.2s')">Fast</div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
-            <div id="p3" class="page" style="display:none;"><div class="item" onclick="document.getElementById('file-input').click()">Choose Wallpaper +</div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(7)">Back</div></div>
-            <div id="p4" class="page" style="display:none;"><div style="padding:40px; text-align:center;"><h1 style="color:var(--text-main);">FakeOS 1.0</h1><p style="color:var(--text-main); opacity:0.6;">POCO X6 Pro Edition</p></div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
-            <div id="p5" class="page" style="display:none;"><div class="item" onclick="changeIconStyle('glassy')">Glassmorphism</div><div class="item" onclick="changeIconStyle('normal')">Classic</div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
-            <div id="p6" class="page" style="display:none;">
-                <div class="item">Fingerprint <div style="display:flex; gap: 12px;"><span onclick="setFingerprint(true)" style="color:#34c759; font-weight: bold;">ON</span><span onclick="setFingerprint(false)" style="color:#ff3b30; font-weight: bold;">OFF</span></div></div>
-                <div class="item" id="createPinBtn" onclick="createPin()">Create a PIN <span style="color:var(--ios-blue);">+</span></div>
-                <div class="item" id="turnOffPinBtn" style="display:none;" onclick="turnOffPin()">Turn off PIN <span style="color:#ff3b30;">✕</span></div>
-                <div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div>
-            </div>
-            <div id="p7" class="page" style="display:none;">
-                <div class="item" onclick="showPage(3)">Wallpaper <span>›</span></div>
-                <div class="item" onclick="showPage(8)">AOD Customization <span>›</span></div>
-                <div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div>
-            </div>
-            <div id="p8" class="page" style="display:none;">
-                <div class="item" onclick="setAODStyle(100)">Clock Style: Thin</div>
-                <div class="item" onclick="setAODStyle(400)">Clock Style: Standard</div>
-                <div class="item" onclick="setAODStyle(800)">Clock Style: Bold</div>
-                <div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(7)">Back</div>
-            </div>
-        </div>
-        
-        <div id="kill-app-btn" onclick="killApp()">✕</div>
-        <div class="app-card-trigger" id="cardTrigger" onclick="exitRecentsToApp()"></div>
-
-        <div class="home-bar" id="bottomBar" 
-             onmousedown="handleHomeStart()" onmouseup="handleHomeEnd()"
-             ontouchstart="handleHomeStart()" ontouchend="handleHomeEnd()"></div>
     </div>
 
     <script>
@@ -372,7 +384,7 @@
         }
         updateBattery();
 
-        // New Power Function
+        // New Power Function linked to physical button
         function togglePower() {
             if (!isPowerOn) { 
                 blackOverlay.classList.remove('screen-is-off'); 
