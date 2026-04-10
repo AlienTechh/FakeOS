@@ -189,7 +189,7 @@
         }
         .app span { color: white; font-size: 0.7rem; font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
 
-        /* IMPROVED ZOOM ANIMATION */
+        /* APP WINDOWS */
         .app-window {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -216,32 +216,55 @@
 
         .back-btn { color: #007aff; font-weight: 700; margin-bottom: 25px; cursor: pointer; }
 
-        /* NAVIGATION BAR SYSTEM */
+        /* NAVIGATION CONTAINER */
         #nav-container {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 50px;
-            z-index: 5600; display: flex; justify-content: center; align-items: center;
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 40px;
+            z-index: 5600; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
         }
 
-        /* Swipe Line Style - Positioned slightly higher */
+        /* Swipe Line - Fixed to be lower */
         #home-bar {
-            width: 120px; height: 5px; background: rgba(255,255,255,0.7);
-            border-radius: 10px; cursor: pointer;
-            margin-bottom: 15px; /* Moved up as requested */
+            width: 120px; 
+            height: 5px; 
+            background: rgba(255,255,255,0.7);
+            border-radius: 10px; 
+            cursor: pointer;
+            margin-bottom: 10px;
         }
 
         /* 3-Button Style */
         #three-buttons {
-            width: 100%; display: none; justify-content: space-around; align-items: center;
+            width: 100%; 
+            display: none; 
+            justify-content: space-around; 
+            align-items: center;
             padding: 0 30px;
+            margin-bottom: 10px;
         }
         .nav-btn {
-            color: white; font-size: 1.3rem; cursor: pointer; width: 50px; height: 40px;
-            display: flex; justify-content: center; align-items: center;
+            color: white; 
+            font-size: 1.3rem; 
+            cursor: pointer; 
+            width: 50px; 
+            height: 40px;
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
         }
 
-        /* Lockscreen Unlock Trigger (Hidden/Transparent Button) */
+        /* Transparent Unlock Trigger for Lockscreen */
         #unlock-trigger {
-            width: 100%; height: 100%; background: transparent; cursor: pointer;
+            width: 100%; 
+            height: 100%; 
+            background: transparent; 
+            cursor: pointer;
         }
     </style>
 </head>
@@ -332,9 +355,7 @@
 
             <div id="nav-container">
                 <div id="unlock-trigger" onclick="handleHomeAction()"></div>
-                
                 <div id="home-bar" onclick="handleHomeAction()" style="display:none;"></div>
-                
                 <div id="three-buttons">
                     <div class="nav-btn" onclick="handleBackAction()">◂</div>
                     <div class="nav-btn" onclick="handleHomeAction()">●</div>
@@ -348,7 +369,7 @@
 
     <script>
         let isPhoneOff = false;
-        let currentNavMode = 'swipe'; // Default
+        let currentNavMode = 'swipe';
         const wallpaperLayer = document.getElementById('main-wallpaper');
         const wallpaperInput = document.getElementById('wallpaper-input');
 
@@ -366,43 +387,27 @@
             document.getElementById('brightness-overlay').style.opacity = darkness;
         }
 
-        // NAVIGATION LOGIC
         function setNavStyle(style) {
             currentNavMode = style;
-            const checkSwipe = document.getElementById('check-swipe');
-            const checkButtons = document.getElementById('check-buttons');
-
-            if (style === 'swipe') {
-                checkSwipe.style.display = 'block';
-                checkButtons.style.display = 'none';
-            } else {
-                checkSwipe.style.display = 'none';
-                checkButtons.style.display = 'block';
-            }
+            document.getElementById('check-swipe').style.display = style === 'swipe' ? 'block' : 'none';
+            document.getElementById('check-buttons').style.display = style === 'buttons' ? 'block' : 'none';
             updateNavVisibility();
         }
 
         function updateNavVisibility() {
-            const lockScreen = document.getElementById('lock-screen');
-            const unlockTrigger = document.getElementById('unlock-trigger');
-            const homeBar = document.getElementById('home-bar');
+            const isLocked = document.getElementById('lock-screen').classList.contains('active');
+            const unlocker = document.getElementById('unlock-trigger');
+            const bar = document.getElementById('home-bar');
             const buttons = document.getElementById('three-buttons');
 
-            if (lockScreen.classList.contains('active')) {
-                // Lockscreen state: Always show transparent unlocker, hide real navs
-                unlockTrigger.style.display = 'block';
-                homeBar.style.display = 'none';
+            if (isLocked) {
+                unlocker.style.display = 'block';
+                bar.style.display = 'none';
                 buttons.style.display = 'none';
             } else {
-                // Unlocked state: Show based on settings
-                unlockTrigger.style.display = 'none';
-                if (currentNavMode === 'swipe') {
-                    homeBar.style.display = 'block';
-                    buttons.style.display = 'none';
-                } else {
-                    homeBar.style.display = 'none';
-                    buttons.style.display = 'flex';
-                }
+                unlocker.style.display = 'none';
+                bar.style.display = currentNavMode === 'swipe' ? 'block' : 'none';
+                buttons.style.display = currentNavMode === 'buttons' ? 'flex' : 'none';
             }
         }
 
@@ -432,7 +437,7 @@
             if(!inSubPage) closeAllApps();
         }
 
-        function handleRecentAction() { console.log("Recent Apps"); }
+        function handleRecentAction() { console.log("Recents"); }
 
         function openApp(id) {
             document.getElementById(id).classList.add('open');
@@ -485,8 +490,6 @@
         }
         setInterval(updateTime, 1000);
         updateTime();
-        
-        // Initial nav setup
         updateNavVisibility();
     </script>
 </body>
