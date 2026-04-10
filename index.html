@@ -6,587 +6,266 @@
     <title>RandomOS 1.0 Beta</title>
     <style>
         * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
+            margin: 0; padding: 0; box-sizing: border-box; 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; 
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
+            -webkit-tap-highlight-color: transparent; user-select: none;
         }
         
         body { 
-            background: #121212; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            overflow: hidden;
+            background: #121212; display: flex; justify-content: center; 
+            align-items: center; height: 100vh; overflow: hidden;
         }
 
         .phone {
-            width: 310px;
-            height: 640px;
-            background: #000;
-            border: 12px solid #222;
-            border-radius: 50px;
-            position: relative;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            width: 310px; height: 640px; background: #000;
+            border: 12px solid #222; border-radius: 50px;
+            position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
 
         .screen-container {
-            width: 100%;
-            height: 100%;
-            border-radius: 38px;
-            overflow: hidden;
-            position: relative;
-            background: #000;
+            width: 100%; height: 100%; border-radius: 38px;
+            overflow: hidden; position: relative; background: #000;
         }
 
-        /* STATUS BAR */
-        .status-bar {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            height: 35px;
-            padding: 0 22px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 4500;
-            color: white;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .status-right { display: flex; align-items: center; gap: 5px; }
-        .battery-icon {
-            width: 20px;
-            height: 10px;
-            border: 1px solid white;
-            border-radius: 3px;
-            position: relative;
-        }
-        .battery-level {
-            position: absolute;
-            left: 1px; top: 1px;
-            height: 6px; width: 80%;
-            background: white;
-        }
-
-        .punch-hole {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 20px;
-            background: #000;
-            border-radius: 50%;
-            z-index: 5000;
-        }
-
+        /* POWER BUTTON */
         .power-btn {
-            position: absolute;
-            right: -15px;
-            top: 120px;
-            width: 6px;
-            height: 50px;
-            background: #444;
-            border-radius: 0 5px 5px 0;
-            cursor: pointer;
-            z-index: 9500;
+            position: absolute; right: -15px; top: 120px;
+            width: 6px; height: 50px; background: #444;
+            border-radius: 0 5px 5px 0; cursor: pointer; z-index: 9500;
         }
 
-        /* POWER MENU & BOOT */
-        #power-menu {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(15px);
-            z-index: 8000;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 25px;
-        }
-        .power-option { 
-            color: white; 
-            font-size: 1.2rem; 
-            padding: 10px 20px;
-            cursor: pointer; 
-        }
-        .power-option.red { color: #ff453a; font-weight: bold; }
-
+        /* NEW GALAXY BOOT ANIMATION */
         #boot-screen {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: black;
-            z-index: 9000;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; z-index: 9000; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
         }
-        .boot-logo { font-size: 1.4rem; font-weight: bold; letter-spacing: 3px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
-        /* OVERLAYS */
-        #brightness-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: black; opacity: 0; pointer-events: none; z-index: 4000;
+        .orbit-container {
+            position: relative; width: 180px; height: 180px;
+            display: flex; justify-content: center; align-items: center;
         }
+
+        .orbit-ring {
+            position: absolute; width: 100%; height: 100%;
+            border-radius: 50%; border: 3px solid transparent;
+            border-top: 3px solid #00a2ff;
+            box-shadow: 0 -8px 20px rgba(0, 162, 255, 0.6);
+            filter: blur(1px);
+            animation: rotateGalaxy 1.2s linear infinite;
+        }
+
+        .orbit-ring.inner {
+            width: 75%; height: 75%; border-top-color: #00ffff;
+            animation-duration: 1.8s; animation-direction: reverse; opacity: 0.5;
+        }
+
+        .boot-logo { 
+            font-size: 1.2rem; font-weight: 900; letter-spacing: 4px; 
+            color: white; text-shadow: 0 0 12px rgba(255,255,255,0.7);
+            opacity: 0; animation: revealLogo 3.5s ease-in forwards;
+        }
+
+        @keyframes rotateGalaxy {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes revealLogo {
+            0% { opacity: 0; transform: scale(0.8); filter: blur(8px); }
+            50% { opacity: 0.2; }
+            100% { opacity: 1; transform: scale(1); filter: blur(0); }
+        }
+
+        /* SYSTEM OVERLAYS */
+        #power-menu {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(15px);
+            z-index: 8000; display: none; flex-direction: column;
+            justify-content: center; align-items: center; gap: 20px;
+        }
+        .power-option { color: white; padding: 10px; cursor: pointer; font-size: 1.1rem; }
+        .red { color: #ff453a; font-weight: bold; }
 
         #black-overlay {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: #000;
-            z-index: 7000;
-            display: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 7000; display: none;
         }
 
-        /* CONTROL CENTER */
-        #control-center {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 15, 15, 0.7);
-            backdrop-filter: blur(25px);
-            z-index: 4800;
-            transform: translateY(-100%);
-            transition: transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
-            padding: 60px 20px;
-            display: flex; flex-direction: column; gap: 20px;
+        /* STATUS & UI */
+        .status-bar {
+            position: absolute; top: 0; width: 100%; height: 35px;
+            padding: 0 20px; display: flex; justify-content: space-between;
+            align-items: center; z-index: 4500; color: white; font-size: 0.7rem;
         }
-        #control-center.open { transform: translateY(0); }
-
-        .cc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .cc-btn {
-            background: rgba(255,255,255,0.1);
-            padding: 15px; border-radius: 20px;
-            color: white; font-size: 0.8rem;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            cursor: pointer;
-        }
-        .cc-btn.active { background: #007aff; }
-
-        .cc-slider {
-            background: rgba(255,255,255,0.1);
-            padding: 20px; border-radius: 22px; color: white;
-        }
-        .cc-slider input { width: 100%; margin-top: 10px; cursor: pointer; }
-
-        .status-trigger {
-            position: absolute; top: 0; right: 0; width: 40%; height: 40px;
-            z-index: 4600; cursor: pointer;
+        .punch-hole {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            width: 20px; height: 20px; background: #000; border-radius: 50%; z-index: 5000;
         }
 
-        /* WALLPAPER */
         .wallpaper {
-            position: absolute;
-            width: 100%; height: 100%;
-            background-color: #1a1a1a;
-            background-image: url('1000005643.jpg');
-            background-size: cover; background-position: center;
-            transition: filter 0.5s ease, transform 0.6s cubic-bezier(0.2, 0, 0, 1);
-            z-index: 1;
+            position: absolute; width: 100%; height: 100%;
+            background: #1a1a1a url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover;
+            transition: filter 0.5s ease; z-index: 1;
         }
-        .wallpaper.app-active { filter: blur(15px) brightness(0.7); transform: scale(1.1); }
+        .wallpaper.app-active { filter: blur(15px) brightness(0.6); }
 
-        /* SCREENS */
-        .screen {
-            position: absolute;
-            width: 100%; height: 100%;
-            z-index: 5;
-            transition: opacity 0.4s ease;
-        }
-
+        .screen { position: absolute; width: 100%; height: 100%; z-index: 5; transition: opacity 0.3s; }
         .hidden { opacity: 0; pointer-events: none; }
         .active { opacity: 1; pointer-events: all; }
 
-        #lock-screen {
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center; color: white;
-        }
-        .time { font-size: 3.8rem; font-weight: 200; }
-        .date { font-size: 1rem; margin-top: -5px; opacity: 0.8; }
-
+        #lock-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
         #home-screen { padding: 60px 20px; }
-        .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .app { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.1s; }
-        .app:active { transform: scale(0.92); }
-        .icon {
-            width: 55px; height: 55px; border-radius: 16px; margin-bottom: 6px;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 1.6rem; box-shadow: 0 8px 15px rgba(0,0,0,0.3);
-            background: white;
-        }
-        .app span { color: white; font-size: 0.7rem; font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
 
-        /* APP WINDOWS */
-        .app-window {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #f2f2f7; z-index: 1000;
-            border-radius: 38px;
-            padding: 60px 25px;
-            opacity: 0; 
-            pointer-events: none;
-            transform: scale(0);
-            transition: 
-                transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), 
-                opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1);
-        }
-        
-        .app-window.open { opacity: 1; transform: scale(1); pointer-events: all; }
-
-        .settings-item {
-            background: white; padding: 18px; border-radius: 15px; margin-bottom: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            color: #000; font-weight: 600; cursor: pointer;
-        }
-
-        .back-btn { color: #007aff; font-weight: 700; margin-bottom: 25px; cursor: pointer; }
+        .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .icon { width: 50px; height: 50px; background: white; border-radius: 12px; margin-bottom: 5px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; }
+        .app { color: white; font-size: 0.65rem; text-align: center; cursor: pointer; }
 
         #nav-container {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 45px;
-            z-index: 5600; display: flex; justify-content: center; align-items: flex-end;
-            padding-bottom: 8px;
+            position: absolute; bottom: 0; width: 100%; height: 40px;
+            z-index: 5500; display: flex; justify-content: center; align-items: center;
         }
-
-        #home-bar {
-            width: 120px; height: 5px; background: rgba(255,255,255,0.7);
-            border-radius: 10px; cursor: pointer;
-        }
-
-        #three-buttons { width: 100%; display: none; justify-content: space-around; align-items: center; }
-        .nav-btn { color: white; font-size: 1.3rem; cursor: pointer; padding: 10px; }
-
-        #unlock-trigger {
-            position: absolute; bottom: 0; width: 100%; height: 100%; background: transparent; cursor: pointer;
-        }
+        #home-bar { width: 100px; height: 4px; background: white; border-radius: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="phone">
         <div class="power-btn" 
-             onmousedown="startPowerTimer(event)" 
-             onmouseup="endPowerTimer(event)" 
-             ontouchstart="startPowerTimer(event)" 
-             ontouchend="endPowerTimer(event)"></div>
+             onmousedown="startPowerTimer(event)" onmouseup="endPowerTimer(event)" 
+             ontouchstart="startPowerTimer(event)" ontouchend="endPowerTimer(event)"></div>
 
         <div class="screen-container">
             <div id="boot-screen">
-                <div class="boot-logo">RANDOM OS</div>
+                <div class="orbit-container">
+                    <div class="orbit-ring"></div>
+                    <div class="orbit-ring inner"></div>
+                    <div class="boot-logo">RANDOM OS</div>
+                </div>
             </div>
 
             <div id="power-menu">
                 <div class="power-option red" onclick="systemShutdown()">Shutdown</div>
                 <div class="power-option" onclick="systemRestart()">Restart</div>
-                <div class="power-option" onclick="closePowerMenu()">Back</div>
+                <div class="power-option" onclick="closePowerMenu()">Cancel</div>
             </div>
+
+            <div id="black-overlay"></div>
 
             <div class="status-bar">
                 <div id="status-time">00:00</div>
-                <div class="status-right">
-                    <span>5G</span>
-                    <div class="battery-icon"><div class="battery-level"></div></div>
-                </div>
+                <div>5G [|||]</div>
             </div>
-
-            <div class="status-trigger" onclick="toggleCC(true)"></div>
             <div class="punch-hole"></div>
-            
-            <div id="black-overlay"></div>
-            <div id="brightness-overlay"></div>
-            
-            <div class="wallpaper" id="main-wallpaper"></div>
-
-            <div id="control-center">
-                <div class="cc-grid">
-                    <div class="cc-btn" id="wifi-btn" onclick="toggleCCBtn('wifi-btn')">📶 Wi-Fi</div>
-                    <div class="cc-btn" id="bt-btn" onclick="toggleCCBtn('bt-btn')">🔹 Bluetooth</div>
-                </div>
-                <div class="cc-slider">
-                    <label style="font-size: 0.8rem; font-weight: 600;">Brightness</label>
-                    <input type="range" min="0" max="100" value="100" oninput="adjustBrightness(this.value)">
-                </div>
-                <div style="flex-grow: 1; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 20px; color: rgba(255,255,255,0.4); font-size: 2rem; cursor: pointer;" onclick="toggleCC(false)">︿</div>
-            </div>
+            <div class="wallpaper" id="bg"></div>
 
             <div id="lock-screen" class="screen active">
-                <div class="time" id="clock-large">00:00</div>
-                <div class="date">Friday, April 10</div>
+                <h1 id="lock-time" style="font-size: 3rem; font-weight: 200;">00:00</h1>
+                <p>Friday, April 10</p>
+                <p style="position:absolute; bottom:60px; font-size: 0.8rem; opacity: 0.6;">Swipe bar to unlock</p>
             </div>
 
             <div id="home-screen" class="screen hidden">
                 <div class="app-grid">
-                    <div class="app" onclick="openAppWithOrigin(this, 'settings-main')">
-                        <div class="icon">⚙️</div>
-                        <span>Settings</span>
-                    </div>
-                </div>
-            </div>
-
-            <div id="settings-main" class="app-window">
-                <h1 style="margin-bottom: 25px;">Settings</h1>
-                <div class="settings-item" onclick="showSubPage('nav-settings')">
-                    <span>Navigation Bar</span>
-                    <span>❯</span>
-                </div>
-                <div class="settings-item" onclick="showSubPage('custom-page')">
-                    <span>Customization</span>
-                    <span>❯</span>
-                </div>
-            </div>
-
-            <div id="nav-settings" class="app-window">
-                <div class="back-btn" onclick="showSubPage('settings-main')">❮ Back</div>
-                <h2 style="margin-bottom: 20px;">Navigation Style</h2>
-                <div class="settings-item" onclick="setNavStyle('swipe')">
-                    <span>Swipe Navigation</span>
-                    <span id="check-swipe">✓</span>
-                </div>
-                <div class="settings-item" onclick="setNavStyle('buttons')">
-                    <span>3-Button Navigation</span>
-                    <span id="check-buttons" style="display:none;">✓</span>
-                </div>
-            </div>
-
-            <div id="custom-page" class="app-window">
-                <div class="back-btn" onclick="showSubPage('settings-main')">❮ Back</div>
-                <h1 style="margin-bottom: 25px;">Appearance</h1>
-                <div class="settings-item" onclick="triggerFileSelect()">
-                    <span>Change Wallpaper</span>
+                    <div class="app" onclick="alert('Settings Open')"><div class="icon">⚙️</div>Settings</div>
+                    <div class="app"><div class="icon">🎵</div>Music</div>
                 </div>
             </div>
 
             <div id="nav-container">
-                <div id="unlock-trigger" onclick="handleHomeAction()"></div>
-                <div id="home-bar" onclick="handleHomeAction()" style="display:none;"></div>
-                <div id="three-buttons">
-                    <div class="nav-btn" onclick="handleBackAction()">◂</div>
-                    <div class="nav-btn" onclick="handleHomeAction()">●</div>
-                    <div class="nav-btn" onclick="handleRecentAction()">■</div>
-                </div>
+                <div id="home-bar" onclick="handleHome()"></div>
             </div>
         </div>
     </div>
 
-    <input type="file" id="wallpaper-input" hidden accept="image/*">
-
     <script>
-        let isPhoneSleeping = false; 
-        let isCompletelyShutdown = false; 
-        let currentNavMode = 'swipe';
+        let isSleeping = false;
+        let isOff = false;
         let powerTimer;
-        let pressStartTime;
-
-        const wallpaperLayer = document.getElementById('main-wallpaper');
-        const wallpaperInput = document.getElementById('wallpaper-input');
+        let pressStart;
 
         function startPowerTimer(e) {
             e.preventDefault();
-            pressStartTime = Date.now();
+            pressStart = Date.now();
             powerTimer = setTimeout(() => {
-                if (isCompletelyShutdown) {
-                    bootSystem();
-                } else {
-                    showPowerMenu();
-                }
+                if (isOff) bootSystem();
+                else showPowerMenu();
             }, 2000);
         }
 
         function endPowerTimer(e) {
             e.preventDefault();
-            const duration = Date.now() - pressStartTime;
+            const duration = Date.now() - pressStart;
             clearTimeout(powerTimer);
-
-            if (duration < 2000) {
-                if (isCompletelyShutdown) return; 
-                toggleSleep();
-            }
+            if (duration < 2000 && !isOff) toggleSleep();
         }
 
         function toggleSleep() {
-            isPhoneSleeping = !isPhoneSleeping;
+            isSleeping = !isSleeping;
             const overlay = document.getElementById('black-overlay');
-            
-            if (isPhoneSleeping) {
+            if (isSleeping) {
                 overlay.style.display = 'block';
             } else {
-                // WHEN TURNING ON: Reset to lockscreen if we were on home or in an app
-                resetToLockscreen();
+                goToLockscreen();
                 overlay.style.display = 'none';
             }
         }
 
-        function resetToLockscreen() {
-            // Close all apps
-            document.querySelectorAll('.app-window').forEach(win => win.classList.remove('open'));
-            wallpaperLayer.classList.remove('app-active');
-            
-            // Show lockscreen, hide home
+        function goToLockscreen() {
             document.getElementById('home-screen').classList.replace('active', 'hidden');
             document.getElementById('lock-screen').classList.replace('hidden', 'active');
-            
-            updateNavVisibility();
+        }
+
+        function handleHome() {
+            if (isSleeping || isOff) return;
+            const lock = document.getElementById('lock-screen');
+            if (lock.classList.contains('active')) {
+                lock.classList.replace('active', 'hidden');
+                document.getElementById('home-screen').classList.replace('hidden', 'active');
+            } else {
+                goToLockscreen();
+            }
         }
 
         function showPowerMenu() {
-            if (isPhoneSleeping) {
-                isPhoneSleeping = false;
-                document.getElementById('black-overlay').style.display = 'none';
-                resetToLockscreen();
-            }
+            if (isSleeping) { isSleeping = false; document.getElementById('black-overlay').style.display = 'none'; }
             document.getElementById('power-menu').style.display = 'flex';
         }
 
-        function closePowerMenu() {
-            document.getElementById('power-menu').style.display = 'none';
-        }
+        function closePowerMenu() { document.getElementById('power-menu').style.display = 'none'; }
 
         function systemShutdown() {
             closePowerMenu();
-            isCompletelyShutdown = true;
-            isPhoneSleeping = true;
+            isOff = true;
             document.getElementById('black-overlay').style.display = 'block';
             document.getElementById('nav-container').style.display = 'none';
         }
 
         function systemRestart() {
-            closePowerMenu();
             systemShutdown();
             setTimeout(bootSystem, 1000);
         }
 
         function bootSystem() {
-            const bootScreen = document.getElementById('boot-screen');
-            bootScreen.style.display = 'flex';
-            
+            const boot = document.getElementById('boot-screen');
+            boot.style.display = 'flex';
             setTimeout(() => {
-                bootScreen.style.display = 'none';
-                isCompletelyShutdown = false;
-                isPhoneSleeping = false;
+                boot.style.display = 'none';
+                isOff = false; isSleeping = false;
                 document.getElementById('black-overlay').style.display = 'none';
                 document.getElementById('nav-container').style.display = 'flex';
-                resetToLockscreen();
-            }, 3000);
+                goToLockscreen();
+            }, 4000);
         }
-
-        function openAppWithOrigin(element, id) {
-            const appWindow = document.getElementById(id);
-            const rect = element.getBoundingClientRect();
-            const containerRect = document.querySelector('.screen-container').getBoundingClientRect();
-            const originX = (rect.left + rect.width / 2) - containerRect.left;
-            const originY = (rect.top + rect.height / 2) - containerRect.top;
-            appWindow.style.transformOrigin = `${originX}px ${originY}px`;
-            appWindow.classList.add('open');
-            wallpaperLayer.classList.add('app-active');
-        }
-
-        function toggleCC(show) {
-            if (isPhoneSleeping || isCompletelyShutdown) return;
-            document.getElementById('control-center').classList.toggle('open', show);
-        }
-
-        function toggleCCBtn(id) {
-            document.getElementById(id).classList.toggle('active');
-        }
-
-        function adjustBrightness(val) {
-            const darkness = (100 - val) / 125; 
-            document.getElementById('brightness-overlay').style.opacity = darkness;
-        }
-
-        function setNavStyle(style) {
-            currentNavMode = style;
-            document.getElementById('check-swipe').style.display = style === 'swipe' ? 'block' : 'none';
-            document.getElementById('check-buttons').style.display = style === 'buttons' ? 'block' : 'none';
-            updateNavVisibility();
-        }
-
-        function updateNavVisibility() {
-            const isLocked = document.getElementById('lock-screen').classList.contains('active');
-            const unlocker = document.getElementById('unlock-trigger');
-            const bar = document.getElementById('home-bar');
-            const buttons = document.getElementById('three-buttons');
-
-            if (isLocked) {
-                unlocker.style.display = 'block';
-                bar.style.display = 'none';
-                buttons.style.display = 'none';
-            } else {
-                unlocker.style.display = 'none';
-                bar.style.display = currentNavMode === 'swipe' ? 'block' : 'none';
-                buttons.style.display = currentNavMode === 'buttons' ? 'flex' : 'none';
-            }
-        }
-
-        function handleHomeAction() {
-            if (isPhoneSleeping) return;
-            toggleCC(false);
-            const lockScreen = document.getElementById('lock-screen');
-            if (lockScreen.classList.contains('active')) {
-                lockScreen.classList.replace('active', 'hidden');
-                document.getElementById('home-screen').classList.replace('hidden', 'active');
-            } else {
-                closeAllApps();
-            }
-            updateNavVisibility();
-        }
-
-        function handleBackAction() {
-            if (isPhoneSleeping) return;
-            const subpages = ['nav-settings', 'custom-page'];
-            let inSubPage = false;
-            subpages.forEach(id => {
-                if(document.getElementById(id).classList.contains('open')) {
-                    showSubPage('settings-main');
-                    inSubPage = true;
-                }
-            });
-            if(!inSubPage) closeAllApps();
-        }
-
-        function closeAllApps() {
-            document.querySelectorAll('.app-window').forEach(win => win.classList.remove('open'));
-            document.getElementById('home-screen').classList.replace('hidden', 'active');
-            wallpaperLayer.classList.remove('app-active');
-        }
-
-        function showSubPage(id) {
-            document.querySelectorAll('.app-window').forEach(win => {
-                if(win.id !== id) win.classList.remove('open');
-            });
-            const target = document.getElementById(id);
-            target.classList.add('open');
-        }
-
-        function triggerFileSelect() { wallpaperInput.click(); }
-
-        wallpaperInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => { wallpaperLayer.style.backgroundImage = `url(${e.target.result})`; };
-                reader.readAsDataURL(file);
-            }
-        });
 
         function updateTime() {
             const now = new Date();
-            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
-                            now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('clock-large').innerText = timeStr;
-            document.getElementById('status-time').innerText = timeStr;
+            const time = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('status-time').innerText = time;
+            document.getElementById('lock-time').innerText = time;
         }
         setInterval(updateTime, 1000);
         updateTime();
-        updateNavVisibility();
     </script>
 </body>
 </html>
