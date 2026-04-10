@@ -99,6 +99,7 @@
             background: var(--status-text);
         }
 
+        /* DYNAMIC ISLAND / PUNCH HOLE */
         .punch-hole {
             position: absolute;
             top: 10px;
@@ -109,6 +110,31 @@
             background: #000;
             border-radius: 50%;
             z-index: 5000;
+            transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        height 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        border-radius 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.6rem;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .punch-hole.charging-island {
+            width: 180px;
+            height: 25px;
+            border-radius: 20px;
+        }
+
+        .punch-hole span {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .punch-hole.charging-island span {
+            opacity: 1;
         }
 
         .power-btn {
@@ -318,52 +344,6 @@
         
         .app-window.open { opacity: 1; transform: scale(1); pointer-events: all; }
 
-        /* FAST SWITCHER STYLES */
-        #recents-screen {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(10px);
-            z-index: 4700;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding-top: 50px;
-        }
-        .recents-container {
-            display: flex;
-            gap: 20px;
-            overflow-x: auto;
-            width: 100%;
-            padding: 20px;
-            scroll-snap-type: x mandatory;
-            scrollbar-width: none;
-        }
-        .recent-card {
-            min-width: 200px;
-            height: 350px;
-            background: var(--bg-color);
-            border-radius: 20px;
-            scroll-snap-align: center;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: transform 0.3s;
-            cursor: pointer;
-        }
-        .recent-card:active { transform: scale(0.95); }
-        .recent-card-header {
-            padding: 10px;
-            background: rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-
         .settings-item {
             background: var(--card-bg); /* Theme based */
             padding: 18px; border-radius: 15px; margin-bottom: 12px;
@@ -410,7 +390,8 @@
         .dev-speed-btn.active { background: #007aff; color: white; }
     </style>
 </head>
-<body class="dark-theme"> <div class="phone">
+<body class="dark-theme"> 
+    <div class="phone">
         <div id="dev-toast">developer options activated</div>
 
         <div class="power-btn" 
@@ -438,12 +419,14 @@
                 <div id="status-time">00:00</div>
                 <div class="status-right">
                     <span>5G</span>
-                    <div class="battery-icon"><div class="battery-level"></div></div>
+                    <div class="battery-icon"><div class="battery-level" id="battery-fill"></div></div>
                 </div>
             </div>
 
             <div class="status-trigger" onclick="toggleCC(true)"></div>
-            <div class="punch-hole"></div>
+            <div class="punch-hole" id="island">
+                <span id="island-text">Device is charging 100%</span>
+            </div>
             
             <div id="black-overlay"></div>
             <div id="brightness-overlay"></div>
@@ -467,22 +450,17 @@
                 <div class="date">Friday, April 10</div>
             </div>
 
-            <div id="recents-screen">
-                <div class="recents-container" id="recents-list"></div>
-                <div style="color:white; margin-top:20px; font-size: 0.8rem; opacity: 0.7;" onclick="handleHomeAction()">Close Recents</div>
-            </div>
-
             <div id="home-screen" class="screen hidden">
                 <div class="app-grid">
-                    <div class="app" onclick="openAppWithOrigin(this, 'settings-main', 'Settings', '⚙️')">
+                    <div class="app" onclick="openAppWithOrigin(this, 'settings-main')">
                         <div class="icon">⚙️</div>
                         <span>Settings</span>
                     </div>
-                    <div class="app" onclick="openAppWithOrigin(this, 'empty-app-1', 'Empty App 1', '👻')">
+                    <div class="app" onclick="openAppWithOrigin(this, 'empty-app-1')">
                         <div class="icon" style="background: #E0E0E0;">👻</div>
                         <span>Empty App 1</span>
                     </div>
-                    <div class="app" onclick="openAppWithOrigin(this, 'empty-app-2', 'Empty App 2', '🍃')">
+                    <div class="app" onclick="openAppWithOrigin(this, 'empty-app-2')">
                         <div class="icon" style="background: #E0E0E0;">🍃</div>
                         <span>Empty App 2</span>
                     </div>
@@ -598,11 +576,42 @@
         let aboutClicks = 0;
         let isDevMode = false;
 
-        // TRACKING FOR FAST SWITCH
-        let openApps = new Set(); // Stores app IDs that are "running"
-
         const wallpaperLayer = document.getElementById('main-wallpaper');
         const wallpaperInput = document.getElementById('wallpaper-input');
+
+        // NEW: BATTERY & DYNAMIC ISLAND LOGIC
+        async function initBattery() {
+            if ('getBattery' in navigator) {
+                const battery = await navigator.getBattery();
+                
+                function updateIsland() {
+                    const level = Math.round(battery.level * 100);
+                    const island = document.getElementById('island');
+                    const text = document.getElementById('island-text');
+                    const fill = document.getElementById('battery-fill');
+
+                    // Update status bar icon
+                    fill.style.width = level + "%";
+
+                    if (battery.charging) {
+                        text.innerText = `Device is charging ${level}%`;
+                        island.classList.add('charging-island');
+                        
+                        // Shrink back after 3 seconds
+                        setTimeout(() => {
+                            island.classList.remove('charging-island');
+                        }, 3000);
+                    }
+                }
+
+                battery.addEventListener('chargingchange', updateIsland);
+                battery.addEventListener('levelchange', updateIsland);
+                
+                // Initial check
+                updateIsland(); 
+            }
+        }
+        initBattery();
 
         // THEME LOGIC
         function setTheme(mode) {
@@ -678,7 +687,6 @@
             wallpaperLayer.classList.remove('app-active');
             document.getElementById('home-screen').classList.replace('active', 'hidden');
             document.getElementById('lock-screen').classList.replace('hidden', 'active');
-            document.getElementById('recents-screen').style.display = 'none';
             updateNavVisibility();
         }
 
@@ -722,24 +730,13 @@
             }, 4500);
         }
 
-        // Updated function to track open apps
-        function openAppWithOrigin(element, id, name, icon) {
+        function openAppWithOrigin(element, id) {
             const appWindow = document.getElementById(id);
             const rect = element.getBoundingClientRect();
             const containerRect = document.querySelector('.screen-container').getBoundingClientRect();
             const originX = (rect.left + rect.width / 2) - containerRect.left;
             const originY = (rect.top + rect.height / 2) - containerRect.top;
-            
             appWindow.style.transformOrigin = `${originX}px ${originY}px`;
-            
-            // Close recents if open
-            document.getElementById('recents-screen').style.display = 'none';
-            
-            // Mark app as running
-            if(name) {
-                openApps.add(JSON.stringify({id, name, icon}));
-            }
-
             appWindow.classList.add('open');
             wallpaperLayer.classList.add('app-active');
         }
@@ -772,7 +769,6 @@
         function handleHomeAction() {
             if (isPhoneSleeping) return;
             toggleCC(false);
-            document.getElementById('recents-screen').style.display = 'none';
             const lock = document.getElementById('lock-screen');
             if (lock.classList.contains('active')) {
                 lock.classList.replace('active', 'hidden');
@@ -801,43 +797,6 @@
             });
             
             if(!backProcessed) handleHomeAction();
-        }
-
-        // NEW RECENTS LOGIC
-        function handleRecentAction() {
-            if (isPhoneSleeping || isCompletelyShutdown) return;
-            
-            const recentsScreen = document.getElementById('recents-screen');
-            const list = document.getElementById('recents-list');
-            list.innerHTML = ""; // Clear list
-
-            if(openApps.size === 0) {
-                list.innerHTML = "<div style='color:white; opacity:0.5'>No apps open</div>";
-            } else {
-                openApps.forEach(appStr => {
-                    const app = JSON.parse(appStr);
-                    const card = document.createElement('div');
-                    card.className = "recent-card";
-                    card.innerHTML = `
-                        <div class="recent-card-header">
-                            <span>${app.icon}</span> ${app.name}
-                        </div>
-                        <div style="flex-grow:1; display:flex; align-items:center; justify-content:center; opacity:0.2; font-size:3rem;">
-                            ${app.icon}
-                        </div>
-                    `;
-                    card.onclick = () => {
-                        // Switch to this app
-                        document.querySelectorAll('.app-window').forEach(win => win.classList.remove('open'));
-                        document.getElementById(app.id).classList.add('open');
-                        recentsScreen.style.display = 'none';
-                        wallpaperLayer.classList.add('app-active');
-                    };
-                    list.appendChild(card);
-                });
-            }
-
-            recentsScreen.style.display = 'flex';
         }
 
         function showSubPage(id) {
