@@ -76,41 +76,6 @@
             transform: translateX(-4px); 
         }
 
-        .boot-screen {
-            position: absolute; 
-            inset: 0; 
-            background: #000; 
-            z-index: 9999;
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center;
-            color: white; 
-            transition: opacity 0.5s ease;
-        }
-
-        .boot-logo { 
-            font-size: 32px; 
-            font-weight: 800; 
-            letter-spacing: 1px; 
-        }
-
-        .boot-spinner {
-            margin-top: 25px; 
-            width: 24px; 
-            height: 24px;
-            border: 3px solid rgba(255,255,255,0.2); 
-            border-top-color: #fff;
-            border-radius: 50%; 
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin { 
-            100% { 
-                transform: rotate(360deg); 
-            } 
-        }
-
         .aod-layer {
             position: absolute; 
             top: 0; 
@@ -581,17 +546,11 @@
 
         <div class="phone" id="phone">
 
-            <div class="boot-screen" id="bootScreen">
-                <div class="boot-logo">FakeOS</div>
-                <div class="boot-spinner"></div>
-            </div>
-
             <div class="aod-layer" id="aod">
                 <div class="aod-time" id="aodTime">00:00</div>
                 <div class="aod-date" id="aodDate">Thursday, April 9</div>
             </div>
 
-            <audio id="sound-boot" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3" preload="auto"></audio>
             <audio id="sound-unlock" src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3"></audio>
             <audio id="sound-lock" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
 
@@ -656,4 +615,25 @@
                 </div>
             </div>
 
-            <div class="drag-btn icon-normal-settin
+            <div class="drag-btn icon-normal-settings" id="settingsBtn" 
+                 onmousedown="setupDrag(event, this, 'settings')" 
+                 ontouchstart="setupDrag(event, this, 'settings')"></div>
+                 
+            <div class="drag-btn icon-normal-cc" id="ccIconBtn" 
+                 onmousedown="setupDrag(event, this, 'cc')" 
+                 ontouchstart="setupDrag(event, this, 'cc')"></div>
+
+            <input type="file" id="file-input" hidden accept="image/*" onchange="changeWallpaper(event)">
+
+            <div class="app" id="settingsApp">
+                <div class="header">Settings</div>
+                <div id="p1" class="page">
+                    <div class="item" onclick="showPage(6)">Screen Lock <span>›</span></div>
+                    <div class="item" onclick="showPage(4)">About Phone <span>›</span></div>
+                    <div class="item" onclick="showPage(2)">Animation Speed <span>›</span></div>
+                    <div class="item" onclick="showPage(5)">Icons <span>›</span></div>
+                    <div class="item" onclick="showPage(7)">Customization <span>›</span></div>
+                </div>
+                
+                <div id="p2" class="page" style="display:none;">
+                    
