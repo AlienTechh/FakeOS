@@ -299,7 +299,7 @@
             position: absolute;
             width: 100%; height: 100%;
             z-index: 5;
-            transition: opacity 0.4s ease;
+            transition: opacity var(--anim-speed) ease, transform var(--anim-speed) cubic-bezier(0.2, 0, 0, 1);
         }
 
         .hidden { opacity: 0; pointer-events: none; }
@@ -308,7 +308,24 @@
         #lock-screen {
             display: flex; flex-direction: column;
             justify-content: center; align-items: center; color: white;
+            transition: transform 0.6s cubic-bezier(0.2, 0, 0, 1), opacity 0.5s;
         }
+        
+        /* UNLOCK ANIMATION CLASSES */
+        .lock-unlocking {
+            transform: scale(1.5);
+            opacity: 0 !important;
+        }
+
+        .home-opening {
+            animation: homeZoomIn 0.6s cubic-bezier(0.2, 0, 0, 1) forwards;
+        }
+
+        @keyframes homeZoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
         .time { font-size: 3.8rem; font-weight: 200; }
         .date { font-size: 1rem; margin-top: -5px; opacity: 0.8; }
 
@@ -435,8 +452,8 @@
 
             <div id="control-center">
                 <div class="cc-grid">
-                    <div class="cc-btn" id="wifi-btn" onclick="toggleCCBtn('wifi-btn')">📶 Wi-Fi</div>
-                    <div class="cc-btn" id="bt-btn" onclick="toggleCCBtn('bt-btn')">🔹 Bluetooth</div>
+                    <div class="cc-btn" id="wifi-btn" onclick="toggleCCBtn('wifi-btn')"> Wi-Fi</div>
+                    <div class="cc-btn" id="bt-btn" onclick="toggleCCBtn('bt-btn')"> Bluetooth</div>
                 </div>
                 <div class="cc-slider">
                     <label style="font-size: 0.8rem; font-weight: 600;">Brightness</label>
@@ -453,15 +470,15 @@
             <div id="home-screen" class="screen hidden">
                 <div class="app-grid">
                     <div class="app" onclick="openAppWithOrigin(this, 'settings-main')">
-                        <div class="icon">⚙️</div>
+                        <div class="icon"></div>
                         <span>Settings</span>
                     </div>
                     <div class="app" onclick="openAppWithOrigin(this, 'empty-app-1')">
-                        <div class="icon" style="background: #E0E0E0;">👻</div>
+                        <div class="icon" style="background: #E0E0E0;"></div>
                         <span>Empty App 1</span>
                     </div>
                     <div class="app" onclick="openAppWithOrigin(this, 'empty-app-2')">
-                        <div class="icon" style="background: #E0E0E0;">🍃</div>
+                        <div class="icon" style="background: #E0E0E0;"></div>
                         <span>Empty App 2</span>
                     </div>
                 </div>
@@ -579,7 +596,16 @@
         const wallpaperLayer = document.getElementById('main-wallpaper');
         const wallpaperInput = document.getElementById('wallpaper-input');
 
-        // NEW: BATTERY & DYNAMIC ISLAND LOGIC
+        // UPDATED CLOCK LOGIC
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('status-time').innerText = timeStr;
+            document.getElementById('clock-large').innerText = timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
         async function initBattery() {
             if ('getBattery' in navigator) {
                 const battery = await navigator.getBattery();
@@ -589,31 +615,23 @@
                     const island = document.getElementById('island');
                     const text = document.getElementById('island-text');
                     const fill = document.getElementById('battery-fill');
-
-                    // Update status bar icon
                     fill.style.width = level + "%";
 
                     if (battery.charging) {
                         text.innerText = `Device is charging ${level}%`;
                         island.classList.add('charging-island');
-                        
-                        // Shrink back after 3 seconds
                         setTimeout(() => {
                             island.classList.remove('charging-island');
                         }, 3000);
                     }
                 }
-
                 battery.addEventListener('chargingchange', updateIsland);
                 battery.addEventListener('levelchange', updateIsland);
-                
-                // Initial check
                 updateIsland(); 
             }
         }
         initBattery();
 
-        // THEME LOGIC
         function setTheme(mode) {
             const body = document.body;
             if (mode === 'light') {
@@ -685,8 +703,16 @@
         function resetToLockscreen() {
             document.querySelectorAll('.app-window').forEach(win => win.classList.remove('open'));
             wallpaperLayer.classList.remove('app-active');
-            document.getElementById('home-screen').classList.replace('active', 'hidden');
-            document.getElementById('lock-screen').classList.replace('hidden', 'active');
+            
+            const lock = document.getElementById('lock-screen');
+            const home = document.getElementById('home-screen');
+            
+            // Clean up animation classes
+            lock.classList.remove('lock-unlocking');
+            home.classList.remove('home-opening');
+            
+            home.classList.replace('active', 'hidden');
+            lock.classList.replace('hidden', 'active');
             updateNavVisibility();
         }
 
@@ -770,14 +796,23 @@
             if (isPhoneSleeping) return;
             toggleCC(false);
             const lock = document.getElementById('lock-screen');
+            const home = document.getElementById('home-screen');
+            
             if (lock.classList.contains('active')) {
-                lock.classList.replace('active', 'hidden');
-                document.getElementById('home-screen').classList.replace('hidden', 'active');
+                // START UNLOCK ANIMATION
+                lock.classList.add('lock-unlocking');
+                
+                setTimeout(() => {
+                    lock.classList.replace('active', 'hidden');
+                    home.classList.replace('hidden', 'active');
+                    home.classList.add('home-opening');
+                    updateNavVisibility();
+                }, 300); // Wait for clock to zoom slightly before switching
+                
             } else {
                 document.querySelectorAll('.app-window').forEach(win => win.classList.remove('open'));
                 wallpaperLayer.classList.remove('app-active');
             }
-            updateNavVisibility();
         }
 
         function handleBackAction() {
@@ -813,17 +848,6 @@
                 reader.readAsDataURL(file);
             }
         });
-
-        function updateTime() {
-            const now = new Date();
-            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
-                            now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('clock-large').innerText = timeStr;
-            document.getElementById('status-time').innerText = timeStr;
-        }
-        setInterval(updateTime, 1000);
-        updateTime();
-        updateNavVisibility();
     </script>
 </body>
 </html>
