@@ -287,12 +287,12 @@
                 </div>
                 <div class="app-grid" id="main-grid">
                     <div class="app-icon-container" onclick="openApp('settings-app', this)">
-                        <div class="app-icon" style="background: linear-gradient(135deg, #8e8e93, #48484a);">⚙️</div>
+                        <div class="app-icon" id="settings-icon-div" style="background: linear-gradient(135deg, #8e8e93, #48484a);">⚙️</div>
                         <p class="app-label">Settings</p>
                     </div>
 
                     <div class="app-icon-container" onclick="openApp('camera-app', this)">
-                        <div class="app-icon" style="background: linear-gradient(135deg, #5e5e5e, #1c1c1c);">📷</div>
+                        <div class="app-icon" id="camera-icon-div" style="background: linear-gradient(135deg, #5e5e5e, #1c1c1c);">📷</div>
                         <p class="app-label">Camera</p>
                     </div>
                 </div>
@@ -323,7 +323,7 @@
                     </div>
                     <div style="width: 25%;">
                         <div class="settings-header"><span onclick="goToPage(0)" style="color:#ff3b30; cursor:pointer; font-size: 18px;">❮ Back</span></div>
-                        <div class="settings-item" onclick="startUnlockSequence()">
+                        <div id="bootloader-row" class="settings-item" onclick="startUnlockSequence()">
                             <span>Unlock Bootloader</span>
                             <span style="color:#ff3b30; font-size: 12px;">UNSAFE</span>
                         </div>
@@ -442,6 +442,9 @@
                 bootLabel.innerText = "Pixel OS";
                 document.getElementById('boot-subtext').innerText = "Google";
                 
+                // DATA WIPE & RESET LOGIC
+                wipeData();
+
                 setTimeout(() => {
                     isCustomOS = true;
                     applyCustomOSTheme();
@@ -451,11 +454,25 @@
             }, 1000);
         }
 
+        function wipeData() {
+            // Remove Developer Access
+            devActive = false;
+            clickCount = 0;
+            document.getElementById('dev-opt-item').style.display = 'none';
+            
+            // Remove Bootloader Unlock Option (Relock simulation)
+            document.getElementById('bootloader-row').style.display = 'none';
+
+            // Reset Wallpapers to default
+            usingLiveWP = false;
+            liveWP.src = "";
+            document.documentElement.style.setProperty('--lock-bg', "none");
+            document.documentElement.style.setProperty('--home-bg', "none");
+        }
+
         function applyCustomOSTheme() {
-            // 1. Change System Colors (Material You - Pixel Style)
             document.body.style.background = "linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)";
             
-            // 2. Transform App Icons to Circles
             const icons = document.querySelectorAll('.app-icon');
             icons.forEach(icon => {
                 icon.style.borderRadius = "50%";
@@ -463,7 +480,6 @@
                 icon.style.boxShadow = "0 4px 10px rgba(0,0,0,0.1)";
             });
 
-            // 3. Update Labels
             const labels = document.querySelectorAll('.app-label');
             labels.forEach(label => {
                 label.style.color = "#1a1c1e";
@@ -471,23 +487,20 @@
                 label.style.fontWeight = "600";
             });
 
-            // 4. Update Settings UI
             const settingsApp = document.getElementById('settings-app');
             settingsApp.style.background = "#f1f3f4";
             settingsApp.style.color = "#1a1c1e";
-            document.getElementById('os-text').innerText = "PixelOS 14 (Unlocked)";
+            document.getElementById('os-text').innerText = "PixelOS 14 (Locked)";
             document.getElementById('os-text').style.color = "#1a73e8";
             document.getElementById('swipe-hint').style.color = "white";
 
-            // 5. Show Search Bar Widget
             document.getElementById('pixel-search').style.display = 'flex';
 
-            // 6. Set Pixel Wallpaper
             document.documentElement.style.setProperty('--home-bg', "url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop')");
             document.documentElement.style.setProperty('--lock-bg', "url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop')");
             
             const toast = document.getElementById('toast');
-            toast.innerText = "Welcome to PixelOS";
+            toast.innerText = "Data Wiped. Welcome to PixelOS";
             toast.style.background = "#1a73e8";
             toast.style.opacity = '1';
             setTimeout(() => toast.style.opacity = '0', 3000);
@@ -602,10 +615,19 @@
         function handleDevClick() {
             if (devActive) return;
             clickCount++;
+            
+            // Toast feedback for tapping software version
+            const toast = document.getElementById('toast');
+            if (clickCount > 2 && clickCount < 6) {
+                toast.innerText = `You are now ${6 - clickCount} steps away from being a developer.`;
+                toast.style.opacity = '1';
+                setTimeout(() => toast.style.opacity = '0', 1000);
+            }
+
             if (clickCount >= 6) {
                 devActive = true;
                 document.getElementById('dev-opt-item').style.display = 'flex';
-                const toast = document.getElementById('toast');
+                toast.innerText = "You are now a developer!";
                 toast.style.opacity = '1';
                 setTimeout(() => toast.style.opacity = '0', 2000);
             }
