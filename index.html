@@ -133,7 +133,6 @@
         .app-icon {
             width: 58px; height: 58px; border-radius: var(--app-radius);
             display: flex; align-items: center; justify-content: center;
-            font-size: 26px; 
             background: rgba(255,255,255,0.12);
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255,255,255,0.1);
@@ -234,7 +233,8 @@
             background: #000; z-index: 200; display: none;
             justify-content: center; align-items: center; color: white;
             flex-direction: column;
-            border-radius: 48px; /* FIX: Added to prevent spilling over phone corners */
+            border-radius: 48px; 
+            overflow: hidden; /* FIX: Added overflow hidden */
         }
         .boot-text { font-size: 24px; font-weight: bold; letter-spacing: 2px; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
@@ -243,6 +243,8 @@
             position: absolute; top:0; left:0; width:100%; height:100%;
             background: rgba(0,0,0,0.8); z-index: 150; display: none;
             justify-content: center; align-items: center;
+            border-radius: 48px; /* FIX: Added border radius to stop sharp corners */
+            overflow: hidden;
         }
         .modal-box {
             background: #1c1c1e; width: 80%; padding: 20px; border-radius: 20px;
@@ -256,6 +258,8 @@
             position: absolute; top:0; left:0; width:100%; height:100%;
             background: #fff; z-index: 180; display: none; color: #1a1c1e;
             padding: 40px 25px; box-sizing: border-box; flex-direction: column;
+            border-radius: 48px; /* FIX: Added border radius to stop sharp corners */
+            overflow: hidden;
         }
         .setup-step { display: none; flex-direction: column; height: 100%; }
         .setup-step.active { display: flex; }
@@ -334,13 +338,18 @@
                     <span style="margin-left: 10px; color: #888; font-size: 13px;">Search...</span>
                 </div>
                 <div class="app-grid" id="main-grid">
+                    
                     <div class="app-icon-container" onclick="openApp('settings-app', this)">
-                        <div class="app-icon" id="settings-icon-div" style="background: linear-gradient(135deg, #8e8e93, #48484a);">⚙️</div>
+                        <div class="app-icon" id="settings-icon-div" style="background: linear-gradient(135deg, #8e8e93, #48484a);">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dynamic-icon"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        </div>
                         <p class="app-label">Settings</p>
                     </div>
 
                     <div class="app-icon-container" onclick="openApp('camera-app', this)">
-                        <div class="app-icon" id="camera-icon-div" style="background: linear-gradient(135deg, #5e5e5e, #1c1c1c);">📷</div>
+                        <div class="app-icon" id="camera-icon-div" style="background: linear-gradient(135deg, #5e5e5e, #1c1c1c);">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dynamic-icon"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        </div>
                         <p class="app-label">Camera</p>
                     </div>
                 </div>
@@ -498,12 +507,26 @@
             closeModal();
             const bootAnim = document.getElementById('boot-animation');
             const bootLabel = document.getElementById('boot-label');
+            const bootSubtext = document.getElementById('boot-subtext');
             document.getElementById('power-overlay').style.opacity = '1';
             
             setTimeout(() => {
                 bootAnim.style.display = 'flex';
-                bootLabel.innerText = "Pixel OS";
-                document.getElementById('boot-subtext').innerText = "Google";
+                bootAnim.style.background = '#000';
+                
+                // FIX: Swap out generic text for a realistic Google "G" logo and specific font style
+                bootLabel.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center; gap: 15px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="60px" height="60px">
+                            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                        </svg>
+                        <span style="font-family: 'Segoe UI', Roboto, sans-serif; font-weight: normal; font-size: 24px; color: white;">PixelOS</span>
+                    </div>
+                `;
+                bootSubtext.style.display = 'none'; // Hide the RandomOS subtext cleanly
                 wipeData();
 
                 setTimeout(() => {
@@ -522,7 +545,6 @@
             document.documentElement.style.setProperty('--home-bg', "none");
             document.documentElement.style.setProperty('--app-radius', "50%"); // Apply 50% for Pixel
             
-            // FIX: Turn off chaos mode when wiping data
             clearInterval(chaosInterval);
             document.body.style.filter = 'invert(0)';
             document.getElementById('chaos-toggle').checked = false;
@@ -536,6 +558,12 @@
             icons.forEach(icon => {
                 icon.style.background = "white";
                 icon.style.boxShadow = "0 4px 10px rgba(0,0,0,0.1)";
+            });
+
+            // FIX: Make sure the SVG strokes switch to dark mode so they are visible on a white background
+            const dynamicIcons = document.querySelectorAll('.dynamic-icon');
+            dynamicIcons.forEach(icon => {
+                icon.setAttribute("stroke", "#1a1c1e"); 
             });
 
             const labels = document.querySelectorAll('.app-label');
