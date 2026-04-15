@@ -14,8 +14,8 @@
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            transition: filter 0.5s ease;
-            touch-action: none; /* Prevents web scrolling */
+            transition: background 0.8s ease, filter 0.5s ease;
+            touch-action: none; 
         }
 
         /* Ambient Background Glow */
@@ -137,6 +137,7 @@
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255,255,255,0.1);
             box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            transition: border-radius 0.5s ease, background 0.5s ease;
         }
 
         .app-label {
@@ -145,11 +146,23 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* Settings Design Update */
+        /* Pixel Search Widget */
+        #pixel-search {
+            display: none;
+            width: 85%;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            margin: 20px auto 0;
+            align-items: center;
+            padding: 0 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
         #settings-app {
             display: flex; background: rgba(15, 15, 15, 0.85); z-index: 40;
             backdrop-filter: blur(30px); overflow: hidden;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, background 0.5s ease;
             transform: scale(0); opacity: 0; pointer-events: none;
             border-radius: 48px;
         }
@@ -184,7 +197,6 @@
             left: 50%; transform: translateX(-50%); z-index: 100;
             cursor: pointer; transition: background 0.3s;
         }
-        #home-bar:hover { background: rgba(255, 255, 255, 0.7); }
 
         #time { font-size: 4.2rem; font-weight: 200; letter-spacing: -2px; margin-top: 100px; text-align: center; }
     
@@ -207,9 +219,7 @@
             cursor:pointer; margin-bottom: 12px; transition: all 0.3s;
             border: 1px solid rgba(255,255,255,0.05);
         }
-        .btn-custom:hover { background: rgba(255,255,255,0.12); }
 
-        /* Camera App Window Styles */
         #camera-app {
             display: flex; background: #000; z-index: 40;
             transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
@@ -218,14 +228,13 @@
         }
         #camera-app.open { transform: scale(1); opacity: 1; pointer-events: auto; }
 
-        /* NEW: Bootloader & Custom OS Styles */
         #boot-animation {
             position: absolute; top:0; left:0; width:100%; height:100%;
             background: #000; z-index: 200; display: none;
             justify-content: center; align-items: center; color: white;
             flex-direction: column;
         }
-        .boot-text { font-size: 24px; font-weight: bold; letter-spacing: 2px; animate: pulse 2s infinite; }
+        .boot-text { font-size: 24px; font-weight: bold; letter-spacing: 2px; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
         #modal-overlay {
@@ -256,8 +265,7 @@
         </div>
 
         <div id="modal-overlay">
-            <div class="modal-box" id="modal-content">
-                </div>
+            <div class="modal-box" id="modal-content"></div>
         </div>
 
         <div class="screen">
@@ -269,10 +277,14 @@
 
             <div id="lockscreen" class="view">
                 <p id="time">00:00</p>
-                <p style="text-align:center; font-size: 14px; opacity: 0.7; margin-top: -20px;">Swipe up to unlock</p>
+                <p id="swipe-hint" style="text-align:center; font-size: 14px; opacity: 0.7; margin-top: -20px;">Swipe up to unlock</p>
             </div>
 
             <div id="homescreen" class="view">
+                <div id="pixel-search">
+                    <span style="font-size: 18px;">G</span>
+                    <span style="margin-left: 10px; color: #888; font-size: 13px;">Search...</span>
+                </div>
                 <div class="app-grid" id="main-grid">
                     <div class="app-icon-container" onclick="openApp('settings-app', this)">
                         <div class="app-icon" style="background: linear-gradient(135deg, #8e8e93, #48484a);">⚙️</div>
@@ -389,7 +401,6 @@
             }
         }
 
-        // --- NEW BOOTLOADER LOGIC ---
         function startUnlockSequence() {
             const modal = document.getElementById('modal-overlay');
             const content = document.getElementById('modal-content');
@@ -424,35 +435,63 @@
             const bootAnim = document.getElementById('boot-animation');
             const bootLabel = document.getElementById('boot-label');
             
-            // Turn off screen first
             document.getElementById('power-overlay').style.opacity = '1';
             
             setTimeout(() => {
                 bootAnim.style.display = 'flex';
-                bootLabel.innerText = "CustomOS";
-                document.getElementById('boot-subtext').innerText = "Booting Unlocked Kernel...";
+                bootLabel.innerText = "Pixel OS";
+                document.getElementById('boot-subtext').innerText = "Google";
                 
                 setTimeout(() => {
-                    // "Boom" - Custom OS Loaded
                     isCustomOS = true;
                     applyCustomOSTheme();
                     bootAnim.style.display = 'none';
-                    togglePower(); // Fake "Auto-on" after reboot
+                    togglePower();
                 }, 4000);
             }, 1000);
         }
 
         function applyCustomOSTheme() {
-            document.getElementById('os-text').innerText = "CustomOS v1.0 (Unlocked)";
-            // Change colors to indicate Custom OS
-            document.documentElement.style.setProperty('--lock-bg', "linear-gradient(45deg, #000, #400)");
-            document.body.style.background = "linear-gradient(135deg, #2e1a1a 0%, #3e1616 100%)";
+            // 1. Change System Colors (Material You - Pixel Style)
+            document.body.style.background = "linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)";
+            
+            // 2. Transform App Icons to Circles
+            const icons = document.querySelectorAll('.app-icon');
+            icons.forEach(icon => {
+                icon.style.borderRadius = "50%";
+                icon.style.background = "white";
+                icon.style.boxShadow = "0 4px 10px rgba(0,0,0,0.1)";
+            });
+
+            // 3. Update Labels
+            const labels = document.querySelectorAll('.app-label');
+            labels.forEach(label => {
+                label.style.color = "#1a1c1e";
+                label.style.textShadow = "none";
+                label.style.fontWeight = "600";
+            });
+
+            // 4. Update Settings UI
+            const settingsApp = document.getElementById('settings-app');
+            settingsApp.style.background = "#f1f3f4";
+            settingsApp.style.color = "#1a1c1e";
+            document.getElementById('os-text').innerText = "PixelOS 14 (Unlocked)";
+            document.getElementById('os-text').style.color = "#1a73e8";
+            document.getElementById('swipe-hint').style.color = "white";
+
+            // 5. Show Search Bar Widget
+            document.getElementById('pixel-search').style.display = 'flex';
+
+            // 6. Set Pixel Wallpaper
+            document.documentElement.style.setProperty('--home-bg', "url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop')");
+            document.documentElement.style.setProperty('--lock-bg', "url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop')");
+            
             const toast = document.getElementById('toast');
-            toast.innerText = "Welcome to CustomOS";
+            toast.innerText = "Welcome to PixelOS";
+            toast.style.background = "#1a73e8";
             toast.style.opacity = '1';
             setTimeout(() => toast.style.opacity = '0', 3000);
         }
-        // --- END BOOTLOADER LOGIC ---
 
         function updateWallpaperVisibility() {
             if (usingLiveWP) {
