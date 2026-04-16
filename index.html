@@ -13,7 +13,7 @@
         }
 
         body {
-            background-color: #1a1a1a; /* Changed from pure black to see the phone better when off */
+            background-color: #1a1a1a;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -39,7 +39,6 @@
             box-shadow: 0 0 40px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s;
         }
 
         .top-bezel {
@@ -52,27 +51,9 @@
             z-index: 1000;
         }
 
-        .speaker {
-            width: 40px;
-            height: 4px;
-            background: #222;
-            border-radius: 2px;
-        }
-
-        .sensor {
-            width: 6px;
-            height: 6px;
-            background: #111;
-            border-radius: 50%;
-            margin-left: 10px;
-        }
-
-        .bottom-bezel {
-            width: 100%;
-            height: 45px;
-            background: #000;
-            z-index: 1000;
-        }
+        .speaker { width: 40px; height: 4px; background: #222; border-radius: 2px; }
+        .sensor { width: 6px; height: 6px; background: #111; border-radius: 50%; margin-left: 10px; }
+        .bottom-bezel { width: 100%; height: 45px; background: #000; z-index: 1000; }
 
         .power-btn {
             position: absolute;
@@ -84,96 +65,17 @@
             border-radius: 0 4px 4px 0;
             cursor: pointer;
             z-index: 1001;
-            transition: background 0.2s;
         }
-        
-        .power-btn:active { background: #666; }
 
         .screen-content {
             flex: 1;
             width: 100%;
             position: relative;
             background: #000;
-            transition: opacity 0.25s ease-in-out;
+            transition: opacity 0.25s;
         }
 
-        /* Power Off State */
-        .screen-off {
-            opacity: 0 !important;
-            pointer-events: none !important;
-        }
-
-        .app-window {
-            position: absolute;
-            inset: 0;
-            background: #fff;
-            z-index: 400;
-            opacity: 0;
-            pointer-events: none;
-            transform: scale(0);
-            transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.2s;
-            overflow: hidden;
-        }
-
-        .app-window.open {
-            opacity: 1;
-            transform: scale(1);
-            pointer-events: auto;
-        }
-
-        #settings { transform-origin: 15% 15%; background: #f2f2f7; padding: 40px 20px; }
-        #tiktok { transform-origin: 40% 15%; background: #000; }
-
-        .tiktok-feed {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            background-color: #000;
-        }
-
-        .tiktok-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .sidebar {
-            position: absolute;
-            right: 10px;
-            bottom: 100px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            align-items: center;
-            z-index: 500;
-        }
-
-        .action-btn {
-            width: 35px;
-            height: 35px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            filter: drop-shadow(0 0 2px rgba(0,0,0,0.8));
-        }
-
-        .heart-icon { color: white; }
-        .heart-icon.active { color: #ff2d55; }
-        .fav-icon { color: white; }
-        .fav-icon.active { color: #ffcc00; }
-        .comment-icon { color: white; }
-
-        .tiktok-ui-overlay {
-            position: absolute;
-            bottom: 40px;
-            left: 15px;
-            color: white;
-            text-shadow: 1px 1px 5px #000;
-            pointer-events: none;
-        }
+        .screen-off { opacity: 0 !important; pointer-events: none !important; }
 
         #lockscreen {
             position: absolute;
@@ -185,10 +87,8 @@
             align-items: center;
             justify-content: space-between;
             padding: 40px 20px 20px;
-            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
         }
-
-        #lockscreen.unlocked { transform: translateY(-100%); }
 
         .home-grid {
             width: 100%; height: 100%;
@@ -197,11 +97,33 @@
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
         }
 
-        .app-icon {
-            width: 54px; height: 54px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; overflow: hidden;
+        .app-window {
+            position: absolute;
+            inset: 0;
+            background: #fff;
+            z-index: 400;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0);
+            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.2s;
+            overflow: hidden;
         }
+
+        .app-window.open { opacity: 1; transform: scale(1); pointer-events: auto; }
+        #settings { transform-origin: 15% 15%; background: #f2f2f7; padding: 40px 20px; }
+        #tiktok { transform-origin: 40% 15%; background: #000; }
+
+        .tiktok-feed { width: 100%; height: 100%; position: relative; }
+        .tiktok-image { width: 100%; height: 100%; object-fit: cover; }
+
+        .sidebar {
+            position: absolute; right: 10px; bottom: 100px;
+            display: flex; flex-direction: column; gap: 20px; z-index: 500;
+        }
+
+        .action-btn { width: 35px; height: 35px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 24px; color: white; }
+        .heart-icon.active { color: #ff2d55; }
+        .fav-icon.active { color: #ffcc00; }
 
         .status-bar {
             position: absolute; top: 5px; width: 100%; padding: 0 20px;
@@ -210,11 +132,12 @@
         }
 
         .app-home-trigger {
-            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 100%; height: 40px; display: flex; justify-content: center; align-items: center; z-index: 700;
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 60px;
+            display: flex; justify-content: center; align-items: flex-end; padding-bottom: 20px;
+            z-index: 900; cursor: grab;
         }
 
-        .home-bar { width: 100px; height: 4px; background: rgba(255,255,255,0.8); border-radius: 10px; }
+        .home-bar { width: 100px; height: 4px; background: rgba(255,255,255,0.6); border-radius: 10px; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -222,11 +145,7 @@
     <div class="phone-wrapper">
         <div class="power-btn" onclick="togglePower()"></div>
         <div class="phone">
-            <div class="top-bezel">
-                <div class="sensor"></div>
-                <div class="speaker"></div>
-                <div class="sensor"></div>
-            </div>
+            <div class="top-bezel"><div class="sensor"></div><div class="speaker"></div><div class="sensor"></div></div>
 
             <div class="screen-content" id="screen">
                 <div class="status-bar">
@@ -235,11 +154,10 @@
                 </div>
 
                 <div id="lockscreen">
-                    <div style="text-align: center; color: white;">
+                    <div style="text-align: center; color: white; margin-top: 40px;">
                         <h1 style="font-size: 50px; font-weight: 200; margin:0;" id="lock-clock">09:41</h1>
                         <p style="opacity: 0.8; margin:0;">Thursday, Apr 16</p>
                     </div>
-                    <div class="home-bar" id="lock-bar" style="cursor: pointer;"></div>
                 </div>
 
                 <div class="home-grid">
@@ -259,22 +177,16 @@
                 <div id="tiktok" class="app-window">
                     <div class="tiktok-feed">
                         <img class="tiktok-image" src="https://photo-cdn2.icons8.com/u6Kq-Mztr6T6ndoFGgWU8u9KCkCVpR5PrUAwGE4VhoQ/rs:fit:1606:1072/wm:1:re:0:0:0.65/wmid:moose/q:98/czM6Ly9pY29uczgu/bW9vc2UtcHJvZC5h/c3NldHMvYXNzZXRz/L3NhdGEvb3JpZ2lu/YWwvNjA1L2Q2MmFi/YTFmLWVhNzEtNDlk/ZC04MDRhLTU2OTVh/MzA4M2IyYi5qcGc.jpg">
-                        
                         <div class="sidebar">
                             <div class="action-btn heart-icon" onclick="toggleLike(this)">❤</div>
                             <div class="action-btn comment-icon">🗨</div>
                             <div class="action-btn fav-icon" onclick="toggleFav(this)">★</div>
                         </div>
-
-                        <div class="tiktok-ui-overlay">
-                            @CleanOS_User<br>
-                            <span style="font-weight: normal; font-size: 12px;">The future is Clean. #CleanOS</span>
-                        </div>
                     </div>
                 </div>
 
-                <div class="app-home-trigger" id="home-trigger" style="cursor: pointer;">
-                    <div class="home-bar" style="background: rgba(255,255,255,0.3);"></div>
+                <div class="app-home-trigger" id="gesture-bar">
+                    <div class="home-bar"></div>
                 </div>
             </div>
 
@@ -284,49 +196,94 @@
 
     <script>
         let isPowerOn = true;
+        let isDragging = false;
         let startY = 0;
-        let activeAction = null; 
-
-        function toggleLike(el) { el.classList.toggle('active'); }
-        function toggleFav(el) { el.classList.toggle('active'); }
+        let currentTranslateY = 0;
+        let isUnlocked = false;
 
         const screen = document.getElementById('screen');
         const lockscreen = document.getElementById('lockscreen');
-        const lockBar = document.getElementById('lock-bar');
-        const homeTrigger = document.getElementById('home-trigger');
+        const gestureBar = document.getElementById('gesture-bar');
 
-        const handleStart = (e, action) => {
-            startY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-            activeAction = action;
+        // Gesture Logic
+        const onStart = (e) => {
+            if (!isPowerOn) return;
+            isDragging = true;
+            startY = e.clientY || e.touches[0].clientY;
+            gestureBar.style.cursor = 'grabbing';
+            lockscreen.style.transition = 'none'; // Disable transition for real-time feel
+            
+            // Get current app window if one is open
+            const openApp = document.querySelector('.app-window.open');
+            if (openApp) openApp.style.transition = 'none';
         };
 
-        const handleEnd = (e) => {
-            if (!startY) return;
-            const endY = e.clientY || (e.changedTouches ? e.changedTouches[0].clientY : startY);
-            if (startY - endY > 50) { 
-                if (activeAction === 'unlock') unlock();
-                else if (activeAction === 'home') goHome();
+        const onMove = (e) => {
+            if (!isDragging) return;
+            const y = e.clientY || e.touches[0].clientY;
+            const deltaY = y - startY;
+            
+            // Only allow upward drag
+            if (deltaY < 0) {
+                currentTranslateY = deltaY;
+                if (!isUnlocked) {
+                    lockscreen.style.transform = `translateY(${deltaY}px)`;
+                } else {
+                    const openApp = document.querySelector('.app-window.open');
+                    if (openApp) openApp.style.transform = `translateY(${deltaY}px) scale(${1 - Math.abs(deltaY/2000)})`;
+                }
             }
-            startY = 0; activeAction = null;
         };
 
-        lockBar.addEventListener('mousedown', (e) => handleStart(e, 'unlock'));
-        lockBar.addEventListener('touchstart', (e) => handleStart(e, 'unlock'));
-        homeTrigger.addEventListener('mousedown', (e) => handleStart(e, 'home'));
-        homeTrigger.addEventListener('touchstart', (e) => handleStart(e, 'home'));
+        const onEnd = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            gestureBar.style.cursor = 'grab';
+            
+            lockscreen.style.transition = 'transform 0.4s cubic-bezier(0.19, 1, 0.22, 1)';
+            const openApp = document.querySelector('.app-window.open');
+            if (openApp) openApp.style.transition = 'transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.2s';
 
-        window.addEventListener('mouseup', handleEnd);
-        window.addEventListener('touchend', handleEnd);
+            if (currentTranslateY < -120) {
+                // Success Threshold
+                if (!isUnlocked) {
+                    lockscreen.style.transform = 'translateY(-100%)';
+                    isUnlocked = true;
+                } else {
+                    goHome();
+                }
+            } else {
+                // Fail - Snap back
+                if (!isUnlocked) {
+                    lockscreen.style.transform = 'translateY(0)';
+                } else if (openApp) {
+                    openApp.style.transform = 'translateY(0) scale(1)';
+                }
+            }
+            currentTranslateY = 0;
+        };
 
-        function unlock() { lockscreen.classList.add('unlocked'); }
-        function goHome() { document.querySelectorAll('.app-window').forEach(w => w.classList.remove('open')); }
+        gestureBar.onpointerdown = onStart;
+        window.onpointermove = onMove;
+        window.onpointerup = onEnd;
+
+        function toggleLike(el) { el.classList.toggle('active'); }
+        function toggleFav(el) { el.classList.toggle('active'); }
         function openApp(id) { document.getElementById(id).classList.add('open'); }
+        
+        function goHome() { 
+            document.querySelectorAll('.app-window').forEach(w => {
+                w.classList.remove('open');
+                w.style.transform = 'scale(0)';
+            });
+        }
 
         function togglePower() {
             isPowerOn = !isPowerOn;
             if (isPowerOn) {
                 screen.classList.remove('screen-off');
-                lockscreen.classList.remove('unlocked');
+                isUnlocked = false;
+                lockscreen.style.transform = 'translateY(0)';
                 goHome();
             } else {
                 screen.classList.add('screen-off');
