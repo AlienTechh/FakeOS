@@ -62,10 +62,32 @@
             transition: opacity 0.25s ease-in-out;
             margin: 0; 
             overflow: hidden;
-            border-radius: 40px; /* Stronger curve to hide black gaps */
+            border-radius: 40px; 
         }
 
         .screen-off { opacity: 0 !important; pointer-events: none !important; }
+
+        /* CONTROL CENTER STYLING */
+        #control-center {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 320px;
+            background: rgba(20, 20, 20, 0.8);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            z-index: 1100;
+            transform: translateY(-100%);
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+            padding: 50px 20px 20px;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        #control-center.open { transform: translateY(0); }
+        .cc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        .cc-tile { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 20px; font-size: 12px; text-align: center; }
+        .cc-tile.active { background: #007aff; }
 
         #lockscreen {
             position: absolute; inset: 0;
@@ -76,7 +98,6 @@
             border-radius: 40px;
         }
 
-        /* FIXED DRAWER: Removed inset and matched radius exactly */
         #app-drawer {
             position: absolute;
             inset: 0; 
@@ -105,7 +126,6 @@
 
         .app-window.open { opacity: 1; transform: scale(1); pointer-events: auto; }
 
-        /* App Logic */
         #tiktok { background: #000; color: white; }
         .tiktok-image { width: 100%; height: 100%; object-fit: cover; display: block; }
         .tt-overlay { position: absolute; inset: 0; pointer-events: none; padding: 25px; display: flex; flex-direction: column; justify-content: flex-end; }
@@ -137,7 +157,14 @@
         .app-icon { width: 54px; height: 54px; border-radius: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
         .app-icon img { width: 100%; height: 100%; border-radius: 12px; pointer-events: none; -webkit-user-drag: none; }
 
-        .status-bar { position: absolute; top: 10px; width: 100%; padding: 0 25px; display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: white; z-index: 1000; }
+        /* STATUS BAR - Updated as trigger */
+        .status-bar { 
+            position: absolute; top: 0; left: 0; width: 100%; 
+            height: 40px; padding: 10px 25px; 
+            display: flex; justify-content: space-between; 
+            font-size: 11px; font-weight: 600; color: white; 
+            z-index: 1200; cursor: ns-resize;
+        }
         .gesture-trigger { position: absolute; bottom: 0; left: 0; width: 100%; height: 50px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 12px; z-index: 1000; }
         .home-bar { width: 80px; height: 4px; background: rgba(255,255,255,0.6); border-radius: 10px; pointer-events: auto; }
 
@@ -155,9 +182,19 @@
             <div class="top-bezel"><div class="sensor"></div><div class="sensor"></div></div>
 
             <div class="screen-content" id="screen">
-                <div class="status-bar">
+                <div class="status-bar" id="status-bar-trigger">
                     <span id="clock">09:41</span>
                     <span>5G 🔋</span> 
+                </div>
+
+                <div id="control-center">
+                    <div style="font-weight: bold; font-size: 18px;">Control Center</div>
+                    <div class="cc-grid">
+                        <div class="cc-tile active">Wi-Fi: On</div>
+                        <div class="cc-tile active">Bluetooth</div>
+                        <div class="cc-tile">Airplane</div>
+                        <div class="cc-tile" style="background: orange;">Flashlight</div>
+                    </div>
                 </div>
 
                 <div id="lockscreen">
@@ -237,12 +274,14 @@
     </div>
 
     <script>
-        let isPowerOn = true, isUnlocked = false, isDrawerOpen = false;
+        let isPowerOn = true, isUnlocked = false, isDrawerOpen = false, isCCOpen = false;
         let startY = 0, isDragging = false, targetFPS = 20, lastFrameTime = 0;
         
         const screen = document.getElementById('screen');
         const lockscreen = document.getElementById('lockscreen');
         const drawer = document.getElementById('app-drawer');
+        const cc = document.getElementById('control-center');
+        const statusBar = document.getElementById('status-bar-trigger');
         const gestureArea = document.getElementById('gesture-area');
         const homescreen = document.getElementById('homescreen-wallpaper');
 
@@ -264,6 +303,7 @@
             appWindows.forEach(w => w.style.transition = transition);
             drawer.style.transition = fps === 20 ? "transform 0.6s steps(12)" : "transform 0.4s cubic-bezier(0.19, 1, 0.22, 1)";
             lockscreen.style.transition = fps === 20 ? "transform 0.5s steps(10)" : "transform 0.4s cubic-bezier(0.19, 1, 0.22, 1)";
+            cc.style.transition = fps === 20 ? "transform 0.5s steps(10)" : "transform 0.4s cubic-bezier(0.19, 1, 0.22, 1)";
         }
 
         function openApp(id, iconElement) { 
@@ -288,12 +328,6 @@
 
         const handleMove = (e) => {
             if (!isDragging) return;
-            const currentY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-            const rawDelta = currentY - startY;
-            if (!isUnlocked && rawDelta < 0) {
-                const deltaY = (targetFPS === 20) ? Math.floor(rawDelta / 10) * 10 : rawDelta;
-                lockscreen.style.transform = `translateY(${deltaY}px)`;
-            }
         };
 
         const handleEnd = (e) => {
@@ -301,6 +335,18 @@
             isDragging = false;
             const endY = e.clientY || (e.changedTouches ? e.changedTouches[0].clientY : startY);
             const diff = startY - endY;
+
+            // CONTROL CENTER LOGIC (Swipe Down from Top / Swipe Up to Close)
+            if (diff < -50 && !isCCOpen && isUnlocked) {
+                cc.classList.add('open');
+                isCCOpen = true;
+                return;
+            } 
+            if (diff > 50 && isCCOpen) {
+                cc.classList.remove('open');
+                isCCOpen = false;
+                return;
+            }
 
             if (!isUnlocked) {
                 lockscreen.style.transition = (targetFPS === 20) ? "transform 0.5s steps(10)" : "transform 0.4s cubic-bezier(0.19, 1, 0.22, 1)";
@@ -322,10 +368,13 @@
             }
         };
 
+        // Attach listeners to trigger points
         window.addEventListener('pointermove', handleMove);
         window.addEventListener('pointerup', handleEnd);
         homescreen.addEventListener('pointerdown', handleStart);
         gestureArea.addEventListener('pointerdown', handleStart);
+        statusBar.addEventListener('pointerdown', handleStart);
+        cc.addEventListener('pointerdown', handleStart);
 
         function showSubPage(id) { document.getElementById(id).classList.add('active'); }
         function hideSubPage(id) { document.getElementById(id).classList.remove('active'); }
@@ -333,7 +382,7 @@
         function togglePower() {
             isPowerOn = !isPowerOn;
             screen.classList.toggle('screen-off', !isPowerOn);
-            if (isPowerOn) { isUnlocked = false; lockscreen.style.transform = 'translateY(0)'; goHome(); }
+            if (isPowerOn) { isUnlocked = false; lockscreen.style.transform = 'translateY(0)'; cc.classList.remove('open'); isCCOpen = false; goHome(); }
         }
 
         function updateTime() {
