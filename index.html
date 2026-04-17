@@ -76,7 +76,9 @@
             margin: 0; 
             overflow: hidden;
             border-radius: 40px; 
-            -webkit-mask-image: -webkit-radial-gradient(white, black);
+            /* Fix for blue corners: using solid clipping instead of complex masks */
+            -webkit-clip-path: inset(0 0 0 0 round 40px);
+            clip-path: inset(0 0 0 0 round 40px);
         }
 
         .screen-off { opacity: 0 !important; pointer-events: none !important; }
@@ -103,8 +105,6 @@
         .cc-tile.active { background: #007aff; }
         
         .cc-tile.lpm-active { background: #ffcc00; color: #000; font-weight: bold; }
-        body.low-power #control-center { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(15, 15, 15, 0.98); }
-        body.low-power #app-drawer { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(0, 0, 0, 0.98); }
 
         #lockscreen {
             position: absolute; inset: 0;
@@ -147,26 +147,25 @@
         #settings { background: #f2f2f7; color: #000; }
         .settings-header { padding: 50px 20px 10px; font-size: 28px; font-weight: bold; }
         .settings-list { background: #fff; border-top: 1px solid #ddd; margin-top: 20px; }
-        .settings-item { padding: 15px 20px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 16px; }
-        .back-btn { color: #007aff; cursor: pointer; padding: 10px 20px; font-size: 17px; display: inline-block; font-weight: 500; }
+        .settings-item { padding: 15px 20px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .back-btn { color: #007aff; cursor: pointer; padding: 10px 20px; font-size: 17px; display: inline-block; }
         .sub-page { position: absolute; inset: 0; background: #f2f2f7; z-index: 10; display: none; overflow-y: auto; }
         .sub-page.active { display: block; }
 
         /* ABOUT PHONE PAGE */
         .about-hero {
-            height: 220px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 200px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
             color: white;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-        .about-hero h1 { font-size: 42px; margin: 0; letter-spacing: -1px; font-weight: 800; }
-        .about-info-row { padding: 15px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; background: white; }
-        .about-label { color: #888; font-size: 14px; }
-        .about-value { font-weight: 500; font-size: 14px; color: #000; }
+        .about-hero h1 { font-size: 40px; margin: 0; font-weight: 800; letter-spacing: -1px; }
+        .about-row { padding: 16px 20px; display: flex; justify-content: space-between; background: white; border-bottom: 1px solid #eee; }
+        .about-label { color: #666; font-size: 15px; }
+        .about-value { font-weight: 500; font-size: 15px; }
 
         /* TOGGLE SWITCH UI */
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
@@ -201,11 +200,7 @@
         }
         
         .unlocked .app-icon { transform: translateY(0); opacity: 1; }
-        .unlocked .app-icon:nth-child(1) { transition-delay: 0.1s; }
-        .unlocked .app-icon:nth-child(2) { transition-delay: 0.15s; }
-        .unlocked .app-icon:nth-child(3) { transition-delay: 0.2s; }
-
-        .app-icon img { width: 100%; height: 100%; border-radius: 12px; pointer-events: none; -webkit-user-drag: none; }
+        .app-icon img { width: 100%; height: 100%; border-radius: 12px; pointer-events: none; }
 
         .status-bar { 
             position: absolute; top: 0; left: 0; width: 100%; 
@@ -239,10 +234,9 @@
                 <div id="control-center">
                     <div style="font-weight: bold; font-size: 18px;">Control Center</div>
                     <div class="cc-grid">
-                        <div class="cc-tile active">Wi-Fi: On</div>
+                        <div class="cc-tile active">Wi-Fi</div>
                         <div class="cc-tile active">Bluetooth</div>
                         <div class="cc-tile">Airplane</div>
-                        <div class="cc-tile" style="background: orange;">Flashlight</div>
                         <div class="cc-tile" id="lpm-btn" onclick="toggleLowPower()" style="grid-column: span 2;">Low Power Mode: Off</div>
                     </div>
                 </div>
@@ -269,12 +263,6 @@
                         <div class="app-icon" onpointerdown="openApp('settings', this)">
                             <img src="https://img.icons8.com/?size=100&id=a8NHl6SmDbn7&format=png">
                         </div>
-                        <div class="app-icon" onpointerdown="openApp('tiktok', this)">
-                            <img src="https://img.icons8.com/?size=100&id=118638&format=png">
-                        </div>
-                        <div class="app-icon" onpointerdown="openApp('browser', this)">
-                            <img src="https://cdn-icons-png.flaticon.com/128/1040/1040243.png">
-                        </div>
                     </div>
                 </div>
 
@@ -286,21 +274,23 @@
                     </div>
 
                     <div id="about-phone" class="sub-page">
-                        <div style="position: absolute; top: 35px; left: 5px; z-index: 20;">
-                            <div class="back-btn" onclick="hideSubPage('about-phone')">‹ Settings</div>
-                        </div>
+                        <div style="padding-top: 40px;"><div class="back-btn" onclick="hideSubPage('about-phone')">‹ Settings</div></div>
                         <div class="about-hero">
                             <h1>CleanOS</h1>
                             <div style="font-size: 12px; opacity: 0.8;">Premium Mobile Experience</div>
                         </div>
                         <div class="settings-list" style="margin-top: 0;">
-                            <div class="about-info-row">
+                            <div class="about-row">
                                 <span class="about-label">Phone Name</span>
                                 <span class="about-value">Samsung Galaxy S8</span>
                             </div>
-                            <div class="about-info-row">
+                            <div class="about-row">
                                 <span class="about-label">Software version</span>
                                 <span class="about-value">1.0 Beta</span>
+                            </div>
+                            <div class="about-row">
+                                <span class="about-label">Android Version</span>
+                                <span class="about-value">14</span>
                             </div>
                         </div>
                     </div>
@@ -316,14 +306,12 @@
                                     <span class="slider"></span>
                                 </label>
                             </div>
-                            <div class="settings-item" onclick="setFPSFromSettings(20)">60Hz (Real 20 FPS)</div>
-                            <div class="settings-item" onclick="setFPSFromSettings(60)">120Hz (Real 60 FPS)</div>
                         </div>
                     </div>
                 </div>
 
                 <div id="tiktok" class="app-window">
-                    <div style="width:100%;height:100%;background:#000;display:flex;align-items:center;justify-content:center;color:#fff;">TikTok Content</div>
+                    <div style="width:100%;height:100%;background:#000;display:flex;align-items:center;justify-content:center;color:#fff;">TikTok</div>
                 </div>
 
                 <div id="browser" class="app-window">
@@ -343,10 +331,7 @@
         let isPowerOn = true, isUnlocked = false, isDrawerOpen = false, isCCOpen = false;
         let startY = 0, isDragging = false, targetFPS = 20, lastFrameTime = 0;
         let swipeStartedOnStatusBar = false;
-        
-        let isLowPower = false;
-        let isEInk = false;
-        let savedFPS = 20;
+        let isLowPower = false, isEInk = false, savedFPS = 20;
         
         const screen = document.getElementById('screen');
         const lockscreen = document.getElementById('lockscreen');
@@ -356,74 +341,29 @@
         const gestureArea = document.getElementById('gesture-area');
         const homescreen = document.getElementById('homescreen-ui');
         const topBezel = document.getElementById('top-bezel');
-        const lpmBtn = document.getElementById('lpm-btn');
-
-        const originalRAF = window.requestAnimationFrame;
-        window.requestAnimationFrame = function(callback) {
-            const now = performance.now(), interval = 1000 / targetFPS, delta = now - lastFrameTime;
-            if (delta >= interval) {
-                lastFrameTime = now - (delta % interval);
-                return originalRAF(callback);
-            } else {
-                return originalRAF(() => window.requestAnimationFrame(callback));
-            }
-        };
 
         function setFPS(fps) {
             targetFPS = fps;
-            let stepSetting = "cubic-bezier(0.19, 1, 0.22, 1)";
-            if (fps === 20) stepSetting = "steps(10)";
-            if (fps === 10) stepSetting = "steps(5)";
-            if (fps === 4) stepSetting = "steps(2)";
-
-            const appWindows = document.querySelectorAll('.app-window');
-            appWindows.forEach(w => w.style.transition = `transform 0.4s ${stepSetting}, opacity 0.25s`);
-            drawer.style.transition = `transform 0.4s ${stepSetting}`;
-            cc.style.transition = `transform 0.4s ${stepSetting}`;
-            lockscreen.style.transition = `transform 0.4s ${stepSetting}`;
-            homescreen.style.transition = `transform 0.5s ${stepSetting}, opacity 0.5s`;
-        }
-
-        function setFPSFromSettings(fps) {
-            if (isLowPower) toggleLowPower();
-            if (isEInk) toggleEInk(); 
-            savedFPS = fps;
-            setFPS(fps);
+            let stepSetting = fps < 60 ? `steps(${fps/2})` : "cubic-bezier(0.19, 1, 0.22, 1)";
+            document.querySelectorAll('.app-window, #app-drawer, #control-center, #lockscreen, .home-screen').forEach(el => {
+                el.style.transition = `transform 0.4s ${stepSetting}, opacity 0.4s ease`;
+            });
         }
 
         function toggleEInk() {
             isEInk = !isEInk;
             document.body.classList.toggle('eink-mode', isEInk);
-            const toggleInput = document.getElementById('eink-toggle');
-            toggleInput.checked = isEInk;
-
-            if (isEInk) {
-                savedFPS = targetFPS;
-                setFPS(4);
-            } else {
-                setFPS(savedFPS);
-            }
+            isEInk ? setFPS(4) : setFPS(savedFPS);
         }
 
         function toggleLowPower() {
             isLowPower = !isLowPower;
-            if (isLowPower) {
-                savedFPS = targetFPS;
-                setFPS(10);
-                document.body.classList.add('low-power');
-                lpmBtn.classList.add('lpm-active');
-                lpmBtn.innerText = "Low Power Mode: On";
-            } else {
-                setFPS(savedFPS);
-                document.body.classList.remove('low-power');
-                lpmBtn.classList.remove('lpm-active');
-                lpmBtn.innerText = "Low Power Mode: Off";
-            }
+            isLowPower ? setFPS(10) : setFPS(savedFPS);
+            document.getElementById('lpm-btn').innerText = `Low Power Mode: ${isLowPower ? 'On' : 'Off'}`;
         }
 
         function openApp(id, iconElement) { 
-            const app = document.getElementById(id), iconRect = iconElement.getBoundingClientRect(), screenRect = screen.getBoundingClientRect();
-            app.style.transformOrigin = `${(iconRect.left + iconRect.width / 2) - screenRect.left}px ${(iconRect.top + iconRect.height / 2) - screenRect.top}px`;
+            const app = document.getElementById(id);
             app.classList.add('open');
         }
 
@@ -438,23 +378,6 @@
             isDragging = true;
             startY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
             swipeStartedOnStatusBar = (e.currentTarget === statusBar);
-            if (!isUnlocked) {
-                lockscreen.style.transition = 'none';
-                homescreen.style.transition = 'none';
-            }
-        };
-
-        const handleMove = (e) => {
-            if (!isDragging) return;
-            const currentY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-            const diff = startY - currentY;
-
-            if (!isUnlocked && diff > 0) {
-                lockscreen.style.transform = `translateY(${-diff}px)`;
-                let progress = Math.min(diff / 400, 1);
-                homescreen.style.opacity = progress;
-                homescreen.style.transform = `scale(${0.85 + (progress * 0.15)})`;
-            }
         };
 
         const handleEnd = (e) => {
@@ -463,48 +386,23 @@
             const endY = e.clientY || (e.changedTouches ? e.changedTouches[0].clientY : startY);
             const diff = startY - endY;
 
-            let stepSetting = "cubic-bezier(0.19, 1, 0.22, 1)";
-            if (targetFPS === 20) stepSetting = "steps(10)";
-            if (targetFPS === 10) stepSetting = "steps(5)";
-            if (targetFPS === 4) stepSetting = "steps(2)";
-
-            lockscreen.style.transition = `transform 0.4s ${stepSetting}`;
-            homescreen.style.transition = `transform 0.5s ${stepSetting}, opacity 0.5s`;
-
-            if (swipeStartedOnStatusBar && diff < -50 && isUnlocked) {
+            if (swipeStartedOnStatusBar && diff < -50) {
                 cc.classList.add('open');
-                topBezel.classList.add('cc-active');
                 isCCOpen = true;
-                return;
-            } 
-            if (diff > 50 && isCCOpen) {
+            } else if (isCCOpen && diff > 50) {
                 cc.classList.remove('open');
-                topBezel.classList.remove('cc-active');
                 isCCOpen = false;
-                return;
-            }
-
-            if (!isUnlocked) {
-                if (diff > 120) { 
-                    lockscreen.style.transform = 'translateY(-100%)'; 
-                    isUnlocked = true; 
-                    homescreen.classList.add('unlocked');
-                    homescreen.style.opacity = "1";
-                    homescreen.style.transform = "scale(1)";
-                } else { 
-                    lockscreen.style.transform = 'translateY(0)'; 
-                    homescreen.style.opacity = "0";
-                    homescreen.style.transform = "scale(0.85)";
-                }
-            } else {
+            } else if (!isUnlocked && diff > 100) {
+                lockscreen.style.transform = 'translateY(-100%)';
+                isUnlocked = true;
+                homescreen.classList.add('unlocked');
+            } else if (isUnlocked) {
                 if (diff > 50 && document.querySelector('.app-window.open')) goHome();
                 else if (diff > 60 && !isDrawerOpen) { drawer.classList.add('visible'); isDrawerOpen = true; }
                 else if (diff < -60 && isDrawerOpen) { drawer.classList.remove('visible'); isDrawerOpen = false; }
             }
-            swipeStartedOnStatusBar = false;
         };
 
-        window.addEventListener('pointermove', handleMove);
         window.addEventListener('pointerup', handleEnd);
         homescreen.addEventListener('pointerdown', handleStart);
         gestureArea.addEventListener('pointerdown', handleStart);
@@ -518,13 +416,8 @@
             screen.classList.toggle('screen-off', !isPowerOn);
             if (isPowerOn) { 
                 isUnlocked = false; 
+                lockscreen.style.transform = 'translateY(0)';
                 homescreen.classList.remove('unlocked');
-                lockscreen.style.transform = 'translateY(0)'; 
-                homescreen.style.opacity = "0";
-                homescreen.style.transform = "scale(0.85)";
-                cc.classList.remove('open'); 
-                topBezel.classList.remove('cc-active');
-                isCCOpen = false; 
                 goHome(); 
             }
         }
