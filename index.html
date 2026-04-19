@@ -3,149 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HyperOS Pro - Real Hardware Bezels</title>
+    <title>HyperOS Pro - True Bezel & Icon Fix</title>
     <style>
         :root {
-            --phone-width: 360px; 
-            --phone-height: 720px;
+            --phone-width: 350px; 
+            --phone-height: 700px;
             --icon-radius: 14px;
-            --fluid-bezier: cubic-bezier(0.3, 0, 0.1, 1);
-            --anim-speed: 0.9s; /* Slower, more premium feel */
+            --fluid-bezier: cubic-bezier(0.25, 1, 0.3, 1);
+            --anim-speed: 0.85s; 
             --glass: rgba(255, 255, 255, 0.15);
-            --inner-radius: 38px;
+            --inner-radius: 34px;
         }
 
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background: #000; display: flex;
+            overflow: hidden; overscroll-behavior: none;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none; -webkit-user-select: none;
+            background: #080808; display: flex;
             justify-content: center; align-items: center;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
         }
 
-        /* THE PHYSICAL FRAME */
-        #phone-shell {
+        #phone-wrapper {
             width: var(--phone-width);
             height: var(--phone-height);
-            background: #111;
-            border-radius: 50px;
-            padding: 12px; /* This creates the thick physical bezel */
-            box-shadow: 0 0 0 2px #333, 0 30px 60px rgba(0,0,0,0.8);
             position: relative;
+            background-image: url('https://static.thenounproject.com/png/4064637-200.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            justify-content: center; align-items: center;
         }
 
-        /* THE ACTUAL SCREEN */
+        .power-btn {
+            position: absolute; right: 10px; top: 160px;
+            width: 4px; height: 55px; background: #222;
+            border-radius: 0 4px 4px 0; cursor: pointer; z-index: 3000;
+        }
+
+        /* UPDATED: Solid hardware bezel look */
         #phone-container {
-            width: 100%;
-            height: 100%;
+            width: 87.5%; 
+            height: 93.8%;
             background: #000;
             border-radius: var(--inner-radius);
             position: relative;
             overflow: hidden;
-            box-shadow: inset 0 0 10px rgba(0,0,0,1);
+            touch-action: none;
+            isolation: isolate;
+            /* This border IS the bezel */
+            border: 8px solid #000;
+            box-sizing: border-box;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
 
-        /* Screen-top reflections to look like glass */
-        #phone-container::after {
-            content: "";
+        /* FIXED BEZELS: Subtle reflection on top of the black frame */
+        .bezel-fix {
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: -8px; left: -8px; right: -8px; bottom: -8px;
             border-radius: var(--inner-radius);
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%);
             pointer-events: none;
-            z-index: 2000;
+            z-index: 2500;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
         }
 
-        .power-btn {
-            position: absolute; right: -4px; top: 160px;
-            width: 4px; height: 60px; background: #222;
-            border-radius: 0 4px 4px 0; cursor: pointer;
-        }
-
-        #display-content { width: 100%; height: 100%; transition: opacity 0.5s ease; }
+        #display-content { width: 100%; height: 100%; transition: opacity 0.4s ease; border-radius: calc(var(--inner-radius) - 8px); overflow: hidden; }
         .screen-off { opacity: 0; pointer-events: none; }
 
         .punch-hole {
-            position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
-            width: 12px; height: 12px; background: #050505; border-radius: 50%; z-index: 1000;
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            width: 14px; height: 14px; background: #000; border-radius: 50%; z-index: 100;
         }
 
         .status-bar {
-            position: absolute; top: 18px; width: 100%;
-            padding: 0 30px; display: flex; justify-content: space-between;
-            color: white; font-size: 11px; z-index: 900; box-sizing: border-box;
+            position: absolute; top: 12px; width: 100%;
+            padding: 0 20px; display: flex; justify-content: space-between;
+            color: white; font-size: 10px; font-weight: 500; z-index: 90; box-sizing: border-box;
         }
 
-        #homescreen-wall {
+        .wallpaper-container {
             position: absolute; width: 100%; height: 100%;
-            background: url('https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?auto=format&fit=crop&w=600') center/cover;
+            background: #000; overflow: hidden;
+        }
+        
+        #homescreen-wall {
+            width: 100%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?auto=format&fit=crop&q=80&w=600');
+            background-size: cover; background-position: center;
             transition: transform var(--anim-speed) var(--fluid-bezier), filter var(--anim-speed) var(--fluid-bezier);
         }
 
-        .app-open-active #homescreen-wall { transform: scale(1.15); filter: blur(15px) brightness(0.6); }
+        .app-open-active #homescreen-wall {
+            transform: scale(1.18);
+            filter: blur(20px) brightness(0.7);
+        }
 
-        #homescreen { position: relative; width: 100%; height: 100%; padding: 60px 25px; box-sizing: border-box; }
-        .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .layer {
+            position: absolute; width: 100%; height: 100%;
+            transition: transform var(--anim-speed) var(--fluid-bezier), opacity 0.5s ease;
+        }
+
+        #lockscreen {
+            background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600');
+            background-size: cover; background-position: center;
+            z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
+        }
+
+        .unlocked-anim { transform: scale(1.4) !important; opacity: 0 !important; pointer-events: none; }
+
+        #homescreen { z-index: 40; padding: 50px 20px; box-sizing: border-box; }
+        .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
 
         .dock {
-            position: absolute; bottom: 25px; left: 15px; right: 15px;
-            height: 68px; background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(20px); border-radius: 26px;
+            position: absolute; bottom: 15px; left: 10px; right: 10px;
+            height: 65px; background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(25px); border-radius: 24px;
             display: flex; justify-content: space-evenly; align-items: center;
         }
 
         .app-icon {
-            width: 54px; height: 54px; 
+            width: 52px; height: 52px; background: var(--glass);
             border-radius: var(--icon-radius);
+            display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: transform 0.2s;
-            overflow: hidden; display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden; box-sizing: border-box;
         }
 
-        /* FIXED: Messages app size match */
+        /* FIXED: Shrunk Messages Icon padding to 16px */
         .app-icon.msg-special { 
             background: #fff; 
-            padding: 14px; /* Shrunk specifically to match PNG proportion */
+            padding: 16px; 
         }
-        
         .app-icon img { width: 100%; height: 100%; object-fit: contain; }
-        .app-icon:active { transform: scale(0.9); }
-        .app-label { color: white; font-size: 10px; margin-top: 6px; text-align: center; display: block; }
+        .app-icon:active { transform: scale(0.85); }
+        .app-label { color: white; font-size: 10px; margin-top: 5px; text-align: center; }
 
         #app-window {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1500; transform: scale(0); opacity: 0;
-            transition: transform var(--anim-speed) var(--fluid-bezier), opacity 0.4s ease;
-            background: #fff; border-radius: var(--inner-radius);
+            z-index: 60; transform: scale(0); opacity: 0;
+            border-radius: 80px; pointer-events: none;
+            transition: transform var(--anim-speed) var(--fluid-bezier), opacity 0.3s ease, border-radius var(--anim-speed) var(--fluid-bezier);
+            background: #fff;
         }
-        #app-window.open { transform: scale(1); opacity: 1; }
 
-        .nav-bar {
-            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-            width: 100px; height: 4px; background: rgba(255,255,255,0.4); border-radius: 10px; z-index: 2100;
+        #app-window.open { transform: scale(1); opacity: 1; border-radius: 0; pointer-events: auto; }
+
+        .nav-handle-container {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 40px;
+            z-index: 2800; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 8px;
         }
-        .dark-bar { background: rgba(0,0,0,0.2); }
+        .nav-bar { width: 90px; height: 4px; background: rgba(255,255,255,0.5); border-radius: 10px; }
+        .dark-bar { background: rgba(0,0,0,0.25); }
     </style>
 </head>
 <body>
 
-    <div id="phone-shell">
+    <div id="phone-wrapper">
         <div class="power-btn" id="pwr-btn"></div>
         <div id="phone-container">
+            <div class="bezel-fix"></div>
+            
             <div id="display-content">
                 <div class="punch-hole"></div>
                 <div class="status-bar"><span>09:41</span><span>📶 🔋</span></div>
                 
-                <div id="homescreen-wall"></div>
+                <div id="lockscreen" class="layer">
+                    <h1 style="font-size: 3.2rem; margin: 0; font-weight: 200;">09:41</h1>
+                </div>
 
-                <div id="homescreen">
+                <div id="homescreen" class="layer">
+                    <div class="wallpaper-container" style="position: absolute; top:0; left:0; z-index:-1;">
+                        <div id="homescreen-wall"></div>
+                    </div>
+
                     <div class="app-grid">
-                        <div>
+                        <div style="display:flex; flex-direction:column; align-items:center;">
                             <div class="app-icon" data-name="Settings"><img src="https://hyperosupdates.com/wp-content/themes/miuidownload/icons/com.android.settings.webp"></div>
                             <span class="app-label">Settings</span>
                         </div>
-                        <div>
+                        <div style="display:flex; flex-direction:column; align-items:center;">
                             <div class="app-icon" data-name="Gallery"><img src="https://hyperosupdates.com/wp-content/themes/miuidownload/icons/com.miui.gallery.webp"></div>
                             <span class="app-label">Gallery</span>
                         </div>
@@ -160,52 +199,89 @@
                 </div>
 
                 <div id="app-window">
-                    <div style="padding: 80px 30px; color:#000;">
-                        <h1 id="app-title">Settings</h1>
-                        <p>Hardware bezels added. Animation duration set to 0.9s.</p>
+                    <div id="app-content" style="padding: 70px 25px; color:#000;">
+                        <h2 id="app-title">Settings</h2>
+                        <p>Solid hardware bezels and scaled icon sizing.</p>
                     </div>
                 </div>
 
-                <div class="nav-bar" id="nav-indicator"></div>
+                <div class="nav-handle-container" id="nav-trigger">
+                    <div class="nav-bar" id="visual-bar"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        const lockscreen = document.getElementById('lockscreen');
         const appWindow = document.getElementById('app-window');
+        const visualBar = document.getElementById('visual-bar');
+        const trigger = document.getElementById('nav-trigger');
+        const pwrBtn = document.getElementById('pwr-btn');
         const phone = document.getElementById('phone-container');
-        const nav = document.getElementById('nav-indicator');
         const display = document.getElementById('display-content');
+        
         let isPowerOn = true;
+        let startY = 0;
+        let isDragging = false;
 
         document.querySelectorAll('.app-icon').forEach(icon => {
-            icon.onclick = () => {
-                if(!isPowerOn) return;
+            icon.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                if (!isPowerOn || !lockscreen.classList.contains('unlocked-anim')) return;
+                
+                appWindow.style.transition = 'none';
+                appWindow.classList.remove('open');
+                phone.classList.remove('app-open-active');
+                void appWindow.offsetWidth;
+
                 const name = icon.getAttribute('data-name');
                 const rect = icon.getBoundingClientRect();
-                const containerRect = phone.getBoundingClientRect();
+                const phoneRect = phone.getBoundingClientRect();
                 
-                const originX = ((rect.left + rect.width/2) - containerRect.left) / containerRect.width * 100;
-                const originY = ((rect.top + rect.height/2) - containerRect.top) / containerRect.height * 100;
+                const x = ((rect.left + rect.width/2) - phoneRect.left) / phoneRect.width * 100;
+                const y = ((rect.top + rect.height/2) - phoneRect.top) / phoneRect.height * 100;
                 
-                appWindow.style.transformOrigin = `${originX}% ${originY}%`;
+                appWindow.style.transformOrigin = `${x}% ${y}%`;
                 document.getElementById('app-title').innerText = name;
-                appWindow.classList.add('open');
-                phone.classList.add('app-open-active');
-                nav.classList.add('dark-bar');
-            };
+
+                requestAnimationFrame(() => {
+                    appWindow.style.transition = ''; 
+                    appWindow.classList.add('open');
+                    phone.classList.add('app-open-active');
+                });
+            });
         });
 
-        nav.onclick = () => {
-            appWindow.classList.remove('open');
-            phone.classList.remove('app-open-active');
-            nav.classList.remove('dark-bar');
-        };
+        trigger.addEventListener('pointerdown', (e) => { if (isPowerOn) { isDragging = true; startY = e.clientY; } });
 
-        document.getElementById('pwr-btn').onclick = () => {
-            isPowerOn = !isPowerOn;
-            display.classList.toggle('screen-off', !isPowerOn);
-        };
+        window.addEventListener('pointerup', (e) => {
+            if (!isDragging) return;
+            if (startY - e.clientY > 60) {
+                if (!lockscreen.classList.contains('unlocked-anim')) {
+                    lockscreen.classList.add('unlocked-anim');
+                    visualBar.classList.add('dark-bar');
+                } else {
+                    appWindow.classList.remove('open');
+                    phone.classList.remove('app-open-active');
+                }
+            }
+            isDragging = false;
+        });
+
+        pwrBtn.addEventListener('click', () => {
+            if (isPowerOn) {
+                appWindow.classList.remove('open');
+                phone.classList.remove('app-open-active');
+                lockscreen.classList.remove('unlocked-anim');
+                display.classList.add('screen-off');
+                visualBar.classList.remove('dark-bar');
+                isPowerOn = false;
+            } else {
+                display.classList.remove('screen-off');
+                isPowerOn = true;
+            }
+        });
     </script>
 </body>
 </html>
