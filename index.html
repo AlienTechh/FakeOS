@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HyperOS Pro - Instant Response Fix</title>
+    <title>HyperOS Pro - Custom Icons</title>
     <style>
         :root {
             --phone-width: 310px;
@@ -81,10 +81,12 @@
             width: 54px; height: 54px; background: var(--glass);
             backdrop-filter: blur(10px); border-radius: var(--icon-radius);
             display: flex; align-items: center; justify-content: center;
-            font-size: 24px; cursor: pointer; transition: transform 0.1s;
+            cursor: pointer; transition: transform 0.1s;
             border: 1px solid rgba(255,255,255,0.1);
-            touch-action: none; /* Prevents scroll interference */
+            touch-action: none;
+            overflow: hidden;
         }
+        .app-icon img { width: 100%; height: 100%; object-fit: cover; }
         .app-icon:active { transform: scale(0.85); }
         .app-label { color: white; font-size: 10px; margin-top: 5px; text-align: center; }
 
@@ -104,7 +106,7 @@
         }
         .nav-bar { 
             width: 100px; height: 4px; background: rgba(255,255,255,0.6); border-radius: 10px; 
-            transition: background 0.2s; /* Removed transform transition */
+            transition: background 0.2s;
         }
         .dark-bar { background: rgba(0,0,0,0.3); }
         .hidden_ls { transform: translateY(-100%); pointer-events: none; }
@@ -126,27 +128,27 @@
                 <div id="homescreen" class="layer">
                     <div class="app-grid">
                         <div style="display:flex; flex-direction:column; align-items:center;">
-                            <div class="app-icon" data-name="Settings" style="background:#eee;">⚙️</div>
+                            <div class="app-icon" data-name="Settings"><img src="https://play-lh.googleusercontent.com/RkGk7C5nMbMSOxwrG0IvKoSoUpwc9Xa9Ac91aNHMt4Tc5ZQPQ18mbMUZ3oSrjc2cOIk=w526-h296-rw" alt="Settings"></div>
                             <span class="app-label">Settings</span>
                         </div>
                         <div style="display:flex; flex-direction:column; align-items:center;">
-                            <div class="app-icon" data-name="Gallery" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">🖼️</div>
+                            <div class="app-icon" data-name="Gallery"><img src="https://play-lh.googleusercontent.com/RkGk7C5nMbMSOxwrG0IvKoSoUpwc9Xa9Ac91aNHMt4Tc5ZQPQ18mbMUZ3oSrjc2cOIk=w526-h296-rw" alt="Gallery"></div>
                             <span class="app-label">Gallery</span>
                         </div>
                     </div>
 
                     <div class="dock">
-                        <div class="app-icon" data-name="Phone" style="background:#2ecc71;">📞</div>
-                        <div class="app-icon" data-name="Messages" style="background:#3498db;">💬</div>
-                        <div class="app-icon" data-name="Browser" style="background:#e67e22;">🌐</div>
-                        <div class="app-icon" data-name="Camera" style="background:#95a5a6;">📷</div>
+                        <div class="app-icon" data-name="Phone"><img src="https://play-lh.googleusercontent.com/RkGk7C5nMbMSOxwrG0IvKoSoUpwc9Xa9Ac91aNHMt4Tc5ZQPQ18mbMUZ3oSrjc2cOIk=w526-h296-rw" alt="Phone"></div>
+                        <div class="app-icon" data-name="Messages"><img src="https://play-lh.googleusercontent.com/RkGk7C5nMbMSOxwrG0IvKoSoUpwc9Xa9Ac91aNHMt4Tc5ZQPQ18mbMUZ3oSrjc2cOIk=w526-h296-rw" alt="Messages"></div>
+                        <div class="app-icon" data-name="Browser"><img src="https://play-lh.googleusercontent.com/RkGk7C5nMbMSOxwrG0IvKoSoUpwc9Xa9Ac91aNHMt4Tc5ZQPQ18mbMUZ3oSrjc2cOIk=w526-h296-rw" alt="Browser"></div>
+                        <div class="app-icon" data-name="Camera"><img src="https://play-lh.googleusercontent.com/RkGk7C5nMbMSOxwrG0IvKoSoUpwc9Xa9Ac91aNHMt4Tc5ZQPQ18mbMUZ3oSrjc2cOIk=w526-h296-rw" alt="Camera"></div>
                     </div>
                 </div>
 
                 <div id="app-window">
                     <div id="settings-view" style="display:none; padding: 50px 20px; color:#000;">
                         <h2>Settings</h2>
-                        <p>Fluidity: 100%</p>
+                        <p>Icons Updated</p>
                     </div>
                     <div id="generic-view" style="display:none; padding: 50px; text-align:center; color:#000;">
                         <h2 id="app-title">App</h2>
@@ -174,10 +176,9 @@
         let startY = 0;
         let isDragging = false;
 
-        // FIXED: Forced Instant One-Tap with PointerDown and PreventDefault
         document.querySelectorAll('.app-icon').forEach(icon => {
             icon.addEventListener('pointerdown', (e) => {
-                e.preventDefault(); // Stop any ghost clicks or scrolls
+                e.preventDefault();
                 if (!isPowerOn || !lockscreen.classList.contains('hidden_ls')) return;
                 
                 appWindow.style.transition = 'none';
@@ -211,7 +212,6 @@
             });
         });
 
-        // SWIPE LOGIC (Animation removed)
         const startAction = (e) => { if (!isPowerOn) return; isDragging = true; startY = e.clientY || (e.touches ? e.touches[0].clientY : 0); };
         const endAction = (e) => {
             if (!isDragging) return;
